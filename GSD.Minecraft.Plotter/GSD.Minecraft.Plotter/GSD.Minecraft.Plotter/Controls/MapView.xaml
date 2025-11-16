@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:GSD.Minecraft.Plotter.Controls"
+             x:Class="GSD.Minecraft.Plotter.Controls.MapView"
+             x:DataType="controls:MapView">
+  <GraphicsView x:Name="GraphicsView"
+                Drawable="{Binding MapDrawable}" 
+                HorizontalOptions="FillAndExpand"
+                VerticalOptions="FillAndExpand">
+    <GraphicsView.GestureRecognizers>
+      <PanGestureRecognizer PanUpdated="OnPanUpdated" />
+      <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />
+    </GraphicsView.GestureRecognizers>
+  </GraphicsView>
+</ContentView>
