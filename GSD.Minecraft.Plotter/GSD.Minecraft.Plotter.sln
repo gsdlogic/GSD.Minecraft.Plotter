@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GSD.Minecraft.Plotter", "GSD.Minecraft.Plotter\GSD.Minecraft.Plotter\GSD.Minecraft.Plotter.csproj", "{F8510BB3-97E5-464D-941A-1E6595128167}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GSD.Minecraft.Plotter.Droid", "GSD.Minecraft.Plotter\GSD.Minecraft.Plotter.Droid\GSD.Minecraft.Plotter.Droid.csproj", "{78D7B075-481B-4702-9395-AEED1EF969BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GSD.Minecraft.Plotter.iOS", "GSD.Minecraft.Plotter\GSD.Minecraft.Plotter.iOS\GSD.Minecraft.Plotter.iOS.csproj", "{AA77753D-F663-43FB-A575-13D1AC64EAAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GSD.Minecraft.Plotter.Mac", "GSD.Minecraft.Plotter\GSD.Minecraft.Plotter.Mac\GSD.Minecraft.Plotter.Mac.csproj", "{04E84ADB-EFB7-408A-AE2B-5EF8780D357C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GSD.Minecraft.Plotter.WinUI", "GSD.Minecraft.Plotter\GSD.Minecraft.Plotter.WinUI\GSD.Minecraft.Plotter.WinUI.csproj", "{F423ED2A-9206-4902-A246-C40F90177231}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F8510BB3-97E5-464D-941A-1E6595128167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8510BB3-97E5-464D-941A-1E6595128167}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8510BB3-97E5-464D-941A-1E6595128167}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8510BB3-97E5-464D-941A-1E6595128167}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78D7B075-481B-4702-9395-AEED1EF969BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78D7B075-481B-4702-9395-AEED1EF969BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78D7B075-481B-4702-9395-AEED1EF969BE}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{78D7B075-481B-4702-9395-AEED1EF969BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78D7B075-481B-4702-9395-AEED1EF969BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78D7B075-481B-4702-9395-AEED1EF969BE}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{AA77753D-F663-43FB-A575-13D1AC64EAAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA77753D-F663-43FB-A575-13D1AC64EAAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA77753D-F663-43FB-A575-13D1AC64EAAE}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{AA77753D-F663-43FB-A575-13D1AC64EAAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA77753D-F663-43FB-A575-13D1AC64EAAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA77753D-F663-43FB-A575-13D1AC64EAAE}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{04E84ADB-EFB7-408A-AE2B-5EF8780D357C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04E84ADB-EFB7-408A-AE2B-5EF8780D357C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04E84ADB-EFB7-408A-AE2B-5EF8780D357C}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{04E84ADB-EFB7-408A-AE2B-5EF8780D357C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04E84ADB-EFB7-408A-AE2B-5EF8780D357C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04E84ADB-EFB7-408A-AE2B-5EF8780D357C}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{F423ED2A-9206-4902-A246-C40F90177231}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{F423ED2A-9206-4902-A246-C40F90177231}.Debug|Any CPU.Build.0 = Debug|x64
+		{F423ED2A-9206-4902-A246-C40F90177231}.Release|Any CPU.ActiveCfg = Release|x64
+		{F423ED2A-9206-4902-A246-C40F90177231}.Release|Any CPU.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C1894B72-4491-48A5-988A-748BFD5A06CB}
+	EndGlobalSection
+EndGlobal
