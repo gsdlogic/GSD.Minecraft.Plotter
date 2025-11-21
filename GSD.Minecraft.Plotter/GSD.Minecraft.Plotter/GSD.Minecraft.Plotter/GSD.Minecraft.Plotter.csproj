@@ -1,12 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
 		<SingleProject>true</SingleProject>
-		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>GSD.Minecraft.Plotter</RootNamespace>
 		<UseMaui>true</UseMaui>
-		<Nullable>enable</Nullable>
+    <SignAssembly>false</SignAssembly>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -24,6 +23,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.5" />
+		<PackageReference Include="Microsoft.Maui.Core" Version="9.0.111" />
 	</ItemGroup>
 
 </Project>
