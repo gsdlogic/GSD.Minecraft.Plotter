@@ -62,35 +62,64 @@ public class MapDrawable : ViewModelBase, IDrawable
 
         canvas.SaveState();
 
-        canvas.Translate((dirtyRect.Width / 2) + this.CenterX, (dirtyRect.Height / 2) + this.CenterY);
-        canvas.Scale(this.Zoom, this.Zoom);
+        // Apply only translation to center
+        var centerX = (dirtyRect.Width / 2) + this.CenterX;
+        var centerY = (dirtyRect.Height / 2) + this.CenterY;
 
-        // Grid
+        ////// Draw grid first (grid lines scale with zoom)
         canvas.StrokeColor = Colors.LightGray;
         canvas.StrokeSize = 1;
 
-        for (var i = -1000; i <= 1000; i += 50)
+        // World bounds visible on screen
+        var worldMinX = -((dirtyRect.Width / 2f) + this.CenterX) / this.Zoom;
+        var worldMaxX = ((dirtyRect.Width / 2f) - this.CenterX) / this.Zoom;
+
+        var worldMinY = -((dirtyRect.Height / 2f) + this.CenterY) / this.Zoom;
+        var worldMaxY = ((dirtyRect.Height / 2f) - this.CenterY) / this.Zoom;
+
+        // Grid
+        const int GridSpacing = 16;
+
+        // Snap to nearest grid lines
+        var startX = (int)MathF.Floor(worldMinX / GridSpacing) * GridSpacing;
+        var endX = (int)MathF.Ceiling(worldMaxX / GridSpacing) * GridSpacing;
+
+        var startY = (int)MathF.Floor(worldMinY / GridSpacing) * GridSpacing;
+        var endY = (int)MathF.Ceiling(worldMaxY / GridSpacing) * GridSpacing;
+
+        // Vertical lines
+        for (var x = startX; x <= endX; x += GridSpacing)
         {
-            canvas.DrawLine(-1000, i, 1000, i);
-            canvas.DrawLine(i, -1000, i, 1000);
+            var sx = centerX + (x * this.Zoom);
+            canvas.DrawLine(sx, 0, sx, dirtyRect.Height);
         }
 
-        // POIs
+        // Horizontal lines
+        for (var y = startY; y <= endY; y += GridSpacing)
+        {
+            var sy = centerY + (y * this.Zoom);
+            canvas.DrawLine(0, sy, dirtyRect.Width, sy);
+        }
+
+        // Draw POIs (fixed size)
         foreach (var poi in this.Points)
         {
+            var screenX = centerX + (poi.X * this.Zoom);
+            var screenY = centerY + (poi.Y * this.Zoom);
+
             if (poi.Icon != null)
             {
-                canvas.DrawImage(poi.Icon, poi.X - 16, poi.Y - 16, 32, 32);
+                canvas.DrawImage(poi.Icon, screenX - 16, screenY - 16, 32, 32);
             }
             else
             {
                 canvas.FillColor = poi.FillColor;
-                canvas.FillCircle(poi.X, poi.Y, 10);
+                canvas.FillCircle(screenX, screenY, 10); // fixed radius
             }
 
             canvas.FontColor = Colors.White;
-            canvas.FontSize = 10;
-            canvas.DrawString($"{poi.X},{poi.Y}", poi.X, poi.Y, HorizontalAlignment.Left);
+            canvas.FontSize = 10; // fixed font size
+            canvas.DrawString($"{poi.X},{poi.Y}", screenX, screenY, HorizontalAlignment.Left);
         }
 
         canvas.RestoreState();
