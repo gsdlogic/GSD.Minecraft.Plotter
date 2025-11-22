@@ -16,7 +16,7 @@ public class MapDrawable : ViewModelBase, IDrawable
     /// </summary>
     public MapDrawable()
     {
-        this.Zoom = 1.0f;
+        this.Zoom = 30.0f;
     }
 
     /// <summary>
@@ -62,50 +62,58 @@ public class MapDrawable : ViewModelBase, IDrawable
 
         canvas.SaveState();
 
-        // Apply only translation to center
-        var centerX = (dirtyRect.Width / 2) + this.CenterX;
-        var centerY = (dirtyRect.Height / 2) + this.CenterY;
+        var camera = new Camera(dirtyRect, this.CenterX, this.CenterY, this.Zoom);
 
-        ////// Draw grid first (grid lines scale with zoom)
+        DrawGrid(canvas, camera);
+        this.DrawPoints(canvas, camera);
+
+        canvas.RestoreState();
+    }
+
+    /// <summary>
+    /// Draws a grid onto the specified canvas using the provided camera settings.
+    /// </summary>
+    /// <param name="canvas">The canvas on which the grid will be drawn.</param>
+    /// <param name="camera">
+    /// The camera that provides the necessary transformations for converting  world coordinates into screen coordinates.
+    /// </param>
+    private static void DrawGrid(ICanvas canvas, Camera camera)
+    {
+        const int GridSpacing = 1;
+
         canvas.StrokeColor = Colors.LightGray;
         canvas.StrokeSize = 1;
 
-        // World bounds visible on screen
-        var worldMinX = -((dirtyRect.Width / 2f) + this.CenterX) / this.Zoom;
-        var worldMaxX = ((dirtyRect.Width / 2f) - this.CenterX) / this.Zoom;
+        var startX = (int)MathF.Floor(camera.WorldMinX / GridSpacing) * GridSpacing;
+        var endX = (int)MathF.Ceiling(camera.WorldMaxX / GridSpacing) * GridSpacing;
 
-        var worldMinY = -((dirtyRect.Height / 2f) + this.CenterY) / this.Zoom;
-        var worldMaxY = ((dirtyRect.Height / 2f) - this.CenterY) / this.Zoom;
+        var startY = (int)MathF.Floor(camera.WorldMinY / GridSpacing) * GridSpacing;
+        var endY = (int)MathF.Ceiling(camera.WorldMaxY / GridSpacing) * GridSpacing;
 
-        // Grid
-        const int GridSpacing = 16;
-
-        // Snap to nearest grid lines
-        var startX = (int)MathF.Floor(worldMinX / GridSpacing) * GridSpacing;
-        var endX = (int)MathF.Ceiling(worldMaxX / GridSpacing) * GridSpacing;
-
-        var startY = (int)MathF.Floor(worldMinY / GridSpacing) * GridSpacing;
-        var endY = (int)MathF.Ceiling(worldMaxY / GridSpacing) * GridSpacing;
-
-        // Vertical lines
         for (var x = startX; x <= endX; x += GridSpacing)
         {
-            var sx = centerX + (x * this.Zoom);
-            canvas.DrawLine(sx, 0, sx, dirtyRect.Height);
+            var sx = camera.WorldCenterX + (x * camera.Zoom);
+            canvas.DrawLine(sx, 0, sx, camera.DirtyRect.Height);
         }
 
-        // Horizontal lines
         for (var y = startY; y <= endY; y += GridSpacing)
         {
-            var sy = centerY + (y * this.Zoom);
-            canvas.DrawLine(0, sy, dirtyRect.Width, sy);
+            var sy = camera.WorldCenterY + (y * camera.Zoom);
+            canvas.DrawLine(0, sy, camera.DirtyRect.Width, sy);
         }
+    }
 
-        // Draw POIs (fixed size)
+    /// <summary>
+    /// Draws the points of interest (POIs) onto the specified canvas using the provided camera for coordinate transformations.
+    /// </summary>
+    /// <param name="canvas">The canvas on which the points will be drawn.</param>
+    /// <param name="camera">The camera that provides the transformation from world coordinates to screen coordinates.</param>
+    private void DrawPoints(ICanvas canvas, Camera camera)
+    {
         foreach (var poi in this.Points)
         {
-            var screenX = centerX + (poi.X * this.Zoom);
-            var screenY = centerY + (poi.Y * this.Zoom);
+            var screenX = camera.WorldCenterX + (poi.X * camera.Zoom);
+            var screenY = camera.WorldCenterY + (poi.Y * camera.Zoom);
 
             if (poi.Icon != null)
             {
@@ -114,14 +122,63 @@ public class MapDrawable : ViewModelBase, IDrawable
             else
             {
                 canvas.FillColor = poi.FillColor;
-                canvas.FillCircle(screenX, screenY, 10); // fixed radius
+                canvas.FillCircle(screenX, screenY, 10);
             }
 
             canvas.FontColor = Colors.White;
-            canvas.FontSize = 10; // fixed font size
-            canvas.DrawString($"{poi.X},{poi.Y}", screenX, screenY, HorizontalAlignment.Left);
+            canvas.FontSize = 10;
+            canvas.DrawString($"{poi.X},{poi.Y}", screenX + 12, screenY - 8, HorizontalAlignment.Left);
         }
+    }
 
-        canvas.RestoreState();
+    /// <summary>
+    /// Represents a camera used to convert world coordinates into screen
+    /// coordinates based on the drawing region, center offset, and zoom level.
+    /// </summary>
+    /// <param name="dirtyRect">The drawing area for the current frame.</param>
+    /// <param name="centerX">The X offset of the map center in world units.</param>
+    /// <param name="centerY">The Y offset of the map center in world units.</param>
+    /// <param name="zoom">The zoom level applied to world coordinates.</param>
+    private sealed class Camera(RectF dirtyRect, float centerX, float centerY, float zoom)
+    {
+        /// <summary>
+        /// Gets the drawing area for the current frame.
+        /// </summary>
+        public RectF DirtyRect { get; } = dirtyRect;
+
+        /// <summary>
+        /// Gets the X offset of the world center in screen coordinates.
+        /// </summary>
+        public float WorldCenterX { get; } = (dirtyRect.Width / 2f) + centerX;
+
+        /// <summary>
+        /// Gets the Y offset of the world center in screen coordinates.
+        /// </summary>
+        public float WorldCenterY { get; } = (dirtyRect.Height / 2f) + centerY;
+
+        /// <summary>
+        /// Gets the maximum visible world X value.
+        /// </summary>
+        public float WorldMaxX { get; } = ((dirtyRect.Width / 2f) - centerX) / zoom;
+
+        /// <summary>
+        /// Gets the maximum visible world Y value.
+        /// </summary>
+        public float WorldMaxY { get; } = ((dirtyRect.Height / 2f) - centerY) / zoom;
+
+        /// <summary>
+        /// Gets the minimum visible world X value.
+        /// </summary>
+        public float WorldMinX { get; } = -((dirtyRect.Width / 2f) + centerX) / zoom;
+
+        /// <summary>
+        /// Gets the minimum visible world Y value.
+        /// </summary>
+        public float WorldMinY { get; } = -((dirtyRect.Height / 2f) + centerY) / zoom;
+
+        /// <summary>
+        /// Gets the zoom level applied to world coordinates.
+        /// </summary>
+        public float Zoom { get; } = zoom;
     }
 }
