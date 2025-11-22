@@ -79,10 +79,8 @@ public class MapDrawable : ViewModelBase, IDrawable
     /// </param>
     private static void DrawGrid(ICanvas canvas, Camera camera)
     {
-        const int GridSpacing = 1;
-
-        canvas.StrokeColor = Colors.LightGray;
-        canvas.StrokeSize = 1;
+        const float GridSpacing = 1;
+        const float CellOffset = GridSpacing / 2f;
 
         var worldMinX = camera.ScreenToWorldX(camera.ViewPort.Left);
         var worldMaxX = camera.ScreenToWorldX(camera.ViewPort.Left + camera.ViewPort.Width);
@@ -97,14 +95,36 @@ public class MapDrawable : ViewModelBase, IDrawable
 
         for (var x = startX; x <= endX; x += GridSpacing)
         {
-            var sx = camera.WorldToScreenX(x);
+            var sx = camera.WorldToScreenX(x - CellOffset);
+            var isChunkLine = MathF.Floor(x) % 16 == 0;
+
+            canvas.StrokeSize = 1;
+            canvas.StrokeColor = isChunkLine ? Colors.LightGray : Colors.Gray;
             canvas.DrawLine(sx, camera.ViewPort.Top, sx, camera.ViewPort.Top + camera.ViewPort.Height);
+
+            if (isChunkLine)
+            {
+                canvas.FontSize = 14;
+                canvas.FontColor = Colors.White;
+                canvas.DrawString($"{MathF.Floor(x)}", sx, camera.ViewPort.Top + 20, HorizontalAlignment.Center);
+            }
         }
 
         for (var y = startY; y <= endY; y += GridSpacing)
         {
-            var sy = camera.WorldToScreenY(y);
+            var sy = camera.WorldToScreenY(y - CellOffset);
+            var isChunkLine = MathF.Floor(y) % 16 == 0;
+
+            canvas.StrokeSize = 1;
+            canvas.StrokeColor = isChunkLine ? Colors.LightGray : Colors.Gray;
             canvas.DrawLine(camera.ViewPort.Left, sy, camera.ViewPort.Left + camera.ViewPort.Width, sy);
+
+            if (isChunkLine)
+            {
+                canvas.FontSize = 14;
+                canvas.FontColor = Colors.White;
+                canvas.DrawString($"{MathF.Floor(y)}", camera.ViewPort.Left + 20, sy, HorizontalAlignment.Center);
+            }
         }
     }
 
@@ -131,7 +151,7 @@ public class MapDrawable : ViewModelBase, IDrawable
             }
 
             canvas.FontColor = Colors.White;
-            canvas.FontSize = 10;
+            canvas.FontSize = 14;
             canvas.DrawString($"{poi.X},{poi.Y}", screenX + 12, screenY - 8, HorizontalAlignment.Left);
         }
     }
@@ -149,12 +169,12 @@ public class MapDrawable : ViewModelBase, IDrawable
         /// <summary>
         /// The X offset of the world center in screen coordinates.
         /// </summary>
-        private readonly float worldCenterX = (viewPort.Width / 2f) + centerX;
+        private readonly float centerX = (viewPort.Width / 2f) + centerX;
 
         /// <summary>
         /// The Y offset of the world center in screen coordinates.
         /// </summary>
-        private readonly float worldCenterY = (viewPort.Height / 2f) + centerY;
+        private readonly float centerY = (viewPort.Height / 2f) + centerY;
 
         /// <summary>
         /// The zoom level applied to world coordinates.
@@ -174,7 +194,7 @@ public class MapDrawable : ViewModelBase, IDrawable
         /// <returns>The corresponding X-coordinate in world units.</returns>
         public float ScreenToWorldX(float screenX)
         {
-            return (screenX - this.worldCenterX) / this.zoom;
+            return (screenX - this.centerX) / this.zoom;
         }
 
         /// <summary>
@@ -185,29 +205,29 @@ public class MapDrawable : ViewModelBase, IDrawable
         /// <returns>The corresponding Y-coordinate in world units.</returns>
         public float ScreenToWorldY(float screenY)
         {
-            return (screenY - this.worldCenterY) / this.zoom;
+            return (screenY - this.centerY) / this.zoom;
         }
 
         /// <summary>
         /// Converts a world coordinate on the X-axis to a screen coordinate on the X-axis
         /// based on the current camera settings, including zoom level and center offset.
         /// </summary>
-        /// <param name="x">The X-coordinate in world units to be converted.</param>
+        /// <param name="worldX">The X-coordinate in world units to be converted.</param>
         /// <returns>The corresponding X-coordinate in screen units.</returns>
-        public float WorldToScreenX(float x)
+        public float WorldToScreenX(float worldX)
         {
-            return this.worldCenterX + (x * this.zoom);
+            return this.centerX + (worldX * this.zoom);
         }
 
         /// <summary>
         /// Converts a world coordinate on the Y-axis to a screen coordinate on the Y-axis
         /// based on the current camera settings, including zoom level and center offset.
         /// </summary>
-        /// <param name="y">The Y-coordinate in world units to be converted.</param>
+        /// <param name="worldY">The Y-coordinate in world units to be converted.</param>
         /// <returns>The corresponding Y-coordinate in screen units.</returns>
-        public float WorldToScreenY(float y)
+        public float WorldToScreenY(float worldY)
         {
-            return this.worldCenterY + (y * this.zoom);
+            return this.centerY + (worldY * this.zoom);
         }
     }
 }
