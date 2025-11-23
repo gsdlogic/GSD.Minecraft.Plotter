@@ -8,7 +8,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 /// <summary>
-/// Provides a base view model.
+/// Serves as the base class for all view models in the application.
 /// </summary>
 public abstract class ViewModelBase : INotifyPropertyChanged
 {

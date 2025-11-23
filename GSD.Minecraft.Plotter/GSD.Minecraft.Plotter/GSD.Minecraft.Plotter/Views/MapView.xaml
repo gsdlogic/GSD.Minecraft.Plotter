@@ -5,7 +5,6 @@
              x:Class="GSD.Minecraft.Plotter.Views.MapView"
              x:DataType="controls:MapView">
   <GraphicsView x:Name="GraphicsView"
-                Drawable="{Binding MapDrawable}" 
                 HorizontalOptions="FillAndExpand"
                 VerticalOptions="FillAndExpand">
     <GraphicsView.GestureRecognizers>

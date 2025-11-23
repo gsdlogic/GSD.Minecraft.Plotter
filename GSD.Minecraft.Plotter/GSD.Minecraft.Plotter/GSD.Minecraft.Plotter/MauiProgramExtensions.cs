@@ -4,6 +4,7 @@
 
 namespace GSD.Minecraft.Plotter;
 
+using GSD.Minecraft.Plotter.ViewModels;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
@@ -33,6 +34,10 @@ public static class MauiProgramExtensions
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
+
+        builder.Services.AddTransient<MapViewModel>();
+        builder.Services.AddTransient<MarkersViewModel>();
+        builder.Services.AddTransient<WorldsViewModel>();
 
         return builder;
     }

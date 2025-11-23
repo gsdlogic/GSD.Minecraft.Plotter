@@ -7,7 +7,7 @@ namespace GSD.Minecraft.Plotter.ViewModels;
 using System.Collections.ObjectModel;
 
 /// <summary>
-/// Defines an object that can be drawn onto a canvas.
+/// Represents a drawable map with zoom and center point properties,  supporting the addition of markers and rendering capabilities.
 /// </summary>
 public class MapDrawable : ViewModelBase, IDrawable
 {
@@ -38,9 +38,9 @@ public class MapDrawable : ViewModelBase, IDrawable
     }
 
     /// <summary>
-    /// Gets the collection of POIs.
+    /// Gets the collection of markers.
     /// </summary>
-    public ObservableCollection<Poi> Points { get; } = [];
+    public ObservableCollection<MarkerViewModel> Markers { get; } = [];
 
     /// <summary>
     /// Gets or sets the zoom level.
@@ -98,9 +98,12 @@ public class MapDrawable : ViewModelBase, IDrawable
             var sx = camera.WorldToScreenX(x - CellOffset);
             var isChunkLine = MathF.Floor(x) % 16 == 0;
 
-            canvas.StrokeSize = 1;
-            canvas.StrokeColor = isChunkLine ? Colors.LightGray : Colors.Gray;
-            canvas.DrawLine(sx, camera.ViewPort.Top, sx, camera.ViewPort.Top + camera.ViewPort.Height);
+            if (isChunkLine || (camera.Zoom > 10.0))
+            {
+                canvas.StrokeSize = 1;
+                canvas.StrokeColor = isChunkLine ? Colors.LightGray : Colors.Gray;
+                canvas.DrawLine(sx, camera.ViewPort.Top, sx, camera.ViewPort.Top + camera.ViewPort.Height);
+            }
 
             if (isChunkLine)
             {
@@ -115,9 +118,12 @@ public class MapDrawable : ViewModelBase, IDrawable
             var sy = camera.WorldToScreenY(y - CellOffset);
             var isChunkLine = MathF.Floor(y) % 16 == 0;
 
-            canvas.StrokeSize = 1;
-            canvas.StrokeColor = isChunkLine ? Colors.LightGray : Colors.Gray;
-            canvas.DrawLine(camera.ViewPort.Left, sy, camera.ViewPort.Left + camera.ViewPort.Width, sy);
+            if (isChunkLine || (camera.Zoom > 10.0))
+            {
+                canvas.StrokeSize = 1;
+                canvas.StrokeColor = isChunkLine ? Colors.LightGray : Colors.Gray;
+                canvas.DrawLine(camera.ViewPort.Left, sy, camera.ViewPort.Left + camera.ViewPort.Width, sy);
+            }
 
             if (isChunkLine)
             {
@@ -135,7 +141,7 @@ public class MapDrawable : ViewModelBase, IDrawable
     /// <param name="camera">The camera that provides the transformation from world coordinates to screen coordinates.</param>
     private void DrawPoints(ICanvas canvas, Camera camera)
     {
-        foreach (var poi in this.Points)
+        foreach (var poi in this.Markers)
         {
             var screenX = camera.WorldToScreenX(poi.X);
             var screenY = camera.WorldToScreenY(poi.Y);
@@ -177,14 +183,14 @@ public class MapDrawable : ViewModelBase, IDrawable
         private readonly float centerY = (viewPort.Height / 2f) + centerY;
 
         /// <summary>
-        /// The zoom level applied to world coordinates.
-        /// </summary>
-        private readonly float zoom = zoom;
-
-        /// <summary>
         /// Gets the drawing area for the current frame.
         /// </summary>
         public RectF ViewPort { get; } = viewPort;
+
+        /// <summary>
+        /// Gets the zoom level applied to world coordinates.
+        /// </summary>
+        public float Zoom { get; } = zoom;
 
         /// <summary>
         /// Converts a screen coordinate on the X-axis to a world coordinate on the X-axis
@@ -194,7 +200,7 @@ public class MapDrawable : ViewModelBase, IDrawable
         /// <returns>The corresponding X-coordinate in world units.</returns>
         public float ScreenToWorldX(float screenX)
         {
-            return (screenX - this.centerX) / this.zoom;
+            return (screenX - this.centerX) / this.Zoom;
         }
 
         /// <summary>
@@ -205,7 +211,7 @@ public class MapDrawable : ViewModelBase, IDrawable
         /// <returns>The corresponding Y-coordinate in world units.</returns>
         public float ScreenToWorldY(float screenY)
         {
-            return (screenY - this.centerY) / this.zoom;
+            return (screenY - this.centerY) / this.Zoom;
         }
 
         /// <summary>
@@ -216,7 +222,7 @@ public class MapDrawable : ViewModelBase, IDrawable
         /// <returns>The corresponding X-coordinate in screen units.</returns>
         public float WorldToScreenX(float worldX)
         {
-            return this.centerX + (worldX * this.zoom);
+            return this.centerX + (worldX * this.Zoom);
         }
 
         /// <summary>
@@ -227,7 +233,7 @@ public class MapDrawable : ViewModelBase, IDrawable
         /// <returns>The corresponding Y-coordinate in screen units.</returns>
         public float WorldToScreenY(float worldY)
         {
-            return this.centerY + (worldY * this.zoom);
+            return this.centerY + (worldY * this.Zoom);
         }
     }
 }

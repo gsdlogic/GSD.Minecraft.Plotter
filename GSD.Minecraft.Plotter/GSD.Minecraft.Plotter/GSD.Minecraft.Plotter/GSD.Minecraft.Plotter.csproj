@@ -26,4 +26,25 @@
 		<PackageReference Include="Microsoft.Maui.Core" Version="10.0.10" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Compile Update="Views\MapPage.xaml.cs">
+	    <DependentUpon>MapPage.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\MarkersPage.xaml.cs">
+	    <DependentUpon>MarkersPage.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\WorldsPage.xaml.cs">
+	    <DependentUpon>WorldsPage.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Views\MarkersPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\WorldsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
+
 </Project>

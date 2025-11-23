@@ -2,7 +2,7 @@
 // Copyright © 2025 GSD Logic. All Rights Reserved.
 // </copyright>
 
-namespace GSD.Minecraft.Plotter;
+namespace GSD.Minecraft.Plotter.Views;
 
 /// <summary>
 /// Contains interaction logic for <c>AppShell.xaml</c>.

@@ -1,4 +1,4 @@
-// <copyright file="Poi.cs" company="GSD Logic">
+// <copyright file="MarkerViewModel.cs" company="GSD Logic">
 // Copyright © 2025 GSD Logic. All Rights Reserved.
 // </copyright>
 
@@ -7,9 +7,9 @@ namespace GSD.Minecraft.Plotter.ViewModels;
 using IImage = Microsoft.Maui.Graphics.IImage;
 
 /// <summary>
-/// Represents a point of interest (POI) on a map, including its visual properties and coordinates.
+/// Represents a marker view model used for plotting markers on a map.
 /// </summary>
-public class Poi
+public class MarkerViewModel : ViewModelBase
 {
     /// <summary>
     /// Gets or sets the fill color used to visually represent the point of interest (POI) on the map.

@@ -14,6 +14,16 @@ using GSD.Minecraft.Plotter.ViewModels;
 public partial class MapView
 {
     /// <summary>
+    /// Identifies the <see cref="MapDrawable" /> bindable property, which represents the drawable content of the map.
+    /// </summary>
+    public static readonly BindableProperty MapDrawableProperty =
+        BindableProperty.Create(
+            nameof(MapDrawable),
+            typeof(MapDrawable),
+            typeof(MapView),
+            propertyChanged: OnMapDrawableChanged);
+
+    /// <summary>
     /// Indicates whether a pan gesture has started.
     /// </summary>
     private bool panStarted;
@@ -34,13 +44,16 @@ public partial class MapView
     public MapView()
     {
         this.InitializeComponent();
-        this.BindingContext = this;
     }
 
     /// <summary>
-    /// Gets or sets the map drawable.
+    /// Gets or sets the <see cref="MapDrawable" /> instance that represents the drawable content of the map.
     /// </summary>
-    public MapDrawable MapDrawable { get; set; } = new();
+    public MapDrawable MapDrawable
+    {
+        get => (MapDrawable)this.GetValue(MapDrawableProperty);
+        set => this.SetValue(MapDrawableProperty, value);
+    }
 
     /// <summary>
     /// Attaches a platform zoom handler.
@@ -51,6 +64,20 @@ public partial class MapView
         platformZoomHandler?.AttachTo(
             this.GraphicsView,
             this.ZoomAndScale);
+    }
+
+    /// <summary>
+    /// Handles changes to the <see cref="MapDrawable" /> property.
+    /// </summary>
+    /// <param name="bindable">The bindable object on which the property changed.</param>
+    /// <param name="oldValue">The previous value of the property.</param>
+    /// <param name="newValue">The new value of the property.</param>
+    private static void OnMapDrawableChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        var view = (MapView)bindable;
+
+        view.GraphicsView.Drawable = (IDrawable)newValue;
+        view.GraphicsView.Invalidate();
     }
 
     /// <summary>

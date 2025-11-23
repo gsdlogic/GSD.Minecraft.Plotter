@@ -1,11 +1,6 @@
-﻿// <copyright file="App.xaml.cs" company="GSD Logic">
+// <copyright file="App.xaml.cs" company="GSD Logic">
 // Copyright © 2025 GSD Logic. All Rights Reserved.
 // </copyright>
-
-
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace GSD.Minecraft.Plotter.WinUI;
 
@@ -15,14 +10,19 @@ namespace GSD.Minecraft.Plotter.WinUI;
 public partial class App : MauiWinUIApplication
 {
     /// <summary>
-    /// Initializes the singleton application object.  This is the first line of authored code
-    /// executed, and as such is the logical equivalent of main() or WinMain().
+    /// Initializes a new instance of the <see cref="App" /> class.
     /// </summary>
     public App()
     {
         this.InitializeComponent();
     }
 
+    /// <summary>
+    /// Creates and configures a new instance of the .NET MAUI application.
+    /// </summary>
+    /// <returns>
+    /// A configured instance of <see cref="MauiApp" /> representing the application.
+    /// </returns>
     protected override MauiApp CreateMauiApp()
     {
         return MauiProgram.CreateMauiApp();

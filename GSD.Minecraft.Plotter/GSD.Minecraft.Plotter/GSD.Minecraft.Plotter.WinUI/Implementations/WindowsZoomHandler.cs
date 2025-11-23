@@ -28,7 +28,6 @@ public class WindowsZoomHandler : IPlatformZoomHandler
                 element.PointerWheelChanged += (s, e) =>
                 {
                     var point = e.GetCurrentPoint((UIElement)s);
-
                     var factor = point.Properties.MouseWheelDelta > 0 ? 1.1f : 0.9f;
                     zoomCallback(factor, (float)point.Position.X, (float)point.Position.Y);
                 };
