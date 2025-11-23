@@ -4,9 +4,24 @@
 
 namespace GSD.Minecraft.Plotter.ViewModels;
 
+using System.Collections.ObjectModel;
+
 /// <summary>
 /// Represents the view model for a single world in the application.
 /// </summary>
 public class WorldViewModel : ViewModelBase
 {
+    /// <summary>
+    /// Gets the collection of markers.
+    /// </summary>
+    public ObservableCollection<MarkerViewModel> Markers { get; } = [];
+
+    /// <summary>
+    /// Gets or sets the name of the world represented by this view model.
+    /// </summary>
+    public string Name
+    {
+        get => this.GetValue<string>();
+        set => this.SetValue(value);
+    }
 }

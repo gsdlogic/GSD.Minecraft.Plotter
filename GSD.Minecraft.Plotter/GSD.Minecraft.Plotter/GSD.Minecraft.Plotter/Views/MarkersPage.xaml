@@ -1,9 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:GSD.Minecraft.Plotter.ViewModels"
              x:Class="GSD.Minecraft.Plotter.Views.MarkersPage"
-             Shell.NavBarIsVisible="False">
-  <ContentPage.Content>
-    
-  </ContentPage.Content>
+             x:DataType="viewModels:MarkersPageViewModel"
+             Shell.NavBarIsVisible="True">
+
+  <VerticalStackLayout>
+    <Button Text="Add Marker" Command="{Binding AddMarkerCommand}" Margin="10" />
+    <Grid ColumnDefinitions="*,100,100,100" Padding="10" BackgroundColor="Transparent">
+      <Label Text="Name" Grid.Column="0" TextColor="White" FontAttributes="Bold" />
+      <Label Text="X" Grid.Column="1" TextColor="White" FontAttributes="Bold" HorizontalOptions="End" />
+      <Label Text="Y" Grid.Column="2" TextColor="White" FontAttributes="Bold" HorizontalOptions="End" />
+      <Label Text="Z" Grid.Column="3" TextColor="White" FontAttributes="Bold" HorizontalOptions="End" />
+    </Grid>
+    <CollectionView ItemsSource="{Binding Markers}">
+      <CollectionView.ItemTemplate>
+        <DataTemplate x:DataType="viewModels:MarkerViewModel">
+          <Grid ColumnDefinitions="*,100,100,100" Padding="10" BackgroundColor="Transparent">
+            <Label Grid.Column="0" Text="{Binding Name}" TextColor="{Binding FillColor}" />
+            <Label Grid.Column="1" Text="{Binding X}" TextColor="White" HorizontalOptions="End" />
+            <Label Grid.Column="2" Text="{Binding Y}" TextColor="White" HorizontalOptions="End" />
+            <Label Grid.Column="3" Text="{Binding Z}" TextColor="White" HorizontalOptions="End" />
+          </Grid>
+        </DataTemplate>
+      </CollectionView.ItemTemplate>
+    </CollectionView>
+  </VerticalStackLayout>
+
 </ContentPage>

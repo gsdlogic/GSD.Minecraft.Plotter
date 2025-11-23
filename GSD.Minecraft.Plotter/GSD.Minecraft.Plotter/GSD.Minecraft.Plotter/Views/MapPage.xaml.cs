@@ -17,7 +17,7 @@ public partial class MapPage
     /// </summary>
     /// <param name="viewModel">The view model that provides data and commands for the map page.</param>
     /// <param name="platformZoomHandler">The platform-specific zoom handler used to manage zoom interactions on the map.</param>
-    public MapPage(MapViewModel viewModel, IPlatformZoomHandler platformZoomHandler)
+    public MapPage(MapPageViewModel viewModel, IPlatformZoomHandler platformZoomHandler)
     {
         ArgumentNullException.ThrowIfNull(viewModel);
 

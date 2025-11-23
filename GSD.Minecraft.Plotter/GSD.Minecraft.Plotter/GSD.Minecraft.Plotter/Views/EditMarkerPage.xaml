@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:GSD.Minecraft.Plotter.ViewModels"
+             x:Class="GSD.Minecraft.Plotter.Views.EditMarkerPage"
+             x:DataType="viewModels:EditMarkerPageViewModel">
+
+  <VerticalStackLayout Padding="20" Spacing="15">
+
+    <Label Text="Marker Name" />
+    <Entry Text="{Binding Marker.Name}" />
+
+    <Label Text="X Coordinate" />
+    <Entry Text="{Binding Marker.X}" Keyboard="Numeric" />
+
+    <Label Text="Y Coordinate" />
+    <Entry Text="{Binding Marker.Y}" Keyboard="Numeric" />
+
+    <Label Text="Z Coordinate" />
+    <Entry Text="{Binding Marker.Z}" Keyboard="Numeric" />
+
+    <HorizontalStackLayout Spacing="10">
+      <Button Text="Save" Command="{Binding SaveCommand}" />
+      <Button Text="Cancel" Command="{Binding CancelCommand}" />
+    </HorizontalStackLayout>
+
+  </VerticalStackLayout>
+
+</ContentPage>

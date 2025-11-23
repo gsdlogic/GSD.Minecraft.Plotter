@@ -12,27 +12,56 @@ using IImage = Microsoft.Maui.Graphics.IImage;
 public class MarkerViewModel : ViewModelBase
 {
     /// <summary>
-    /// Gets or sets the fill color used to visually represent the point of interest (POI) on the map.
+    /// Gets or sets the fill color used to visually represent the marker.
     /// </summary>
-    public Color FillColor { get; set; }
+    public Color FillColor
+    {
+        get => this.GetValue<Color>();
+        set => this.SetValue(value);
+    }
 
     /// <summary>
-    /// Gets or sets the icon representing the point of interest (POI).
+    /// Gets or sets the icon representing the marker.
     /// </summary>
-    public IImage Icon { get; set; }
+    public IImage Icon
+    {
+        get => this.GetValue<IImage>();
+        set => this.SetValue(value);
+    }
 
     /// <summary>
-    /// Gets or sets the name of the point of interest (POI).
+    /// Gets or sets the name of the marker.
     /// </summary>
-    public string Name { get; set; } = string.Empty;
+    public string Name
+    {
+        get => this.GetValue<string>();
+        set => this.SetValue(value);
+    }
 
     /// <summary>
-    /// Gets or sets the X-coordinate of the point of interest (POI) on the map.
+    /// Gets or sets the X-coordinate of the marker.
     /// </summary>
-    public float X { get; set; }
+    public float X
+    {
+        get => this.GetValue<float>();
+        set => this.SetValue(value);
+    }
 
     /// <summary>
-    /// Gets or sets the Y-coordinate of the point of interest (POI) on the map.
+    /// Gets or sets the Y-coordinate of the marker.
     /// </summary>
-    public float Y { get; set; }
+    public float Y
+    {
+        get => this.GetValue<float>();
+        set => this.SetValue(value);
+    }
+
+    /// <summary>
+    /// Gets or sets the Z-coordinate of the marker.
+    /// </summary>
+    public float Z
+    {
+        get => this.GetValue<float>();
+        set => this.SetValue(value);
+    }
 }

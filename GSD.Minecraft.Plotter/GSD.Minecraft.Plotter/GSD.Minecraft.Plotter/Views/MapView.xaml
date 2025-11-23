@@ -4,9 +4,7 @@
              xmlns:controls="clr-namespace:GSD.Minecraft.Plotter.Views"
              x:Class="GSD.Minecraft.Plotter.Views.MapView"
              x:DataType="controls:MapView">
-  <GraphicsView x:Name="GraphicsView"
-                HorizontalOptions="FillAndExpand"
-                VerticalOptions="FillAndExpand">
+  <GraphicsView x:Name="GraphicsView">
     <GraphicsView.GestureRecognizers>
       <PanGestureRecognizer PanUpdated="OnPanUpdated" />
       <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />

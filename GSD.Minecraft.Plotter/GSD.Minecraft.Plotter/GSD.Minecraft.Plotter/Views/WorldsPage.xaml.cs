@@ -14,8 +14,8 @@ public partial class WorldsPage
     /// <summary>
     /// Initializes a new instance of the <see cref="WorldsPage" /> class with the specified view model.
     /// </summary>
-    /// <param name="viewModel">The <see cref="WorldsViewModel" /> instance that provides data and commands for the page.</param>
-    public WorldsPage(WorldsViewModel viewModel)
+    /// <param name="viewModel">The <see cref="WorldsPageViewModel" /> instance that provides data and commands for the page.</param>
+    public WorldsPage(WorldsPageViewModel viewModel)
     {
         this.InitializeComponent();
         this.BindingContext = viewModel;

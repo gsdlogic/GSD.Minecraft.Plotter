@@ -35,9 +35,10 @@ public static class MauiProgramExtensions
         builder.Logging.AddDebug();
 #endif
 
-        builder.Services.AddTransient<MapViewModel>();
-        builder.Services.AddTransient<MarkersViewModel>();
-        builder.Services.AddTransient<WorldsViewModel>();
+        builder.Services.AddSingleton<AppState>();
+        builder.Services.AddTransient<MapPageViewModel>();
+        builder.Services.AddTransient<MarkersPageViewModel>();
+        builder.Services.AddTransient<WorldsPageViewModel>();
 
         return builder;
     }

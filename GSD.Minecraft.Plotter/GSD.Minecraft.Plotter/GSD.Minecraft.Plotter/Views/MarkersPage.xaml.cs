@@ -14,8 +14,8 @@ public partial class MarkersPage
     /// <summary>
     /// Initializes a new instance of the <see cref="MarkersPage" /> class with the specified view model.
     /// </summary>
-    /// <param name="viewModel">The <see cref="MarkersViewModel" /> instance that provides data and commands for the view.</param>
-    public MarkersPage(MarkersViewModel viewModel)
+    /// <param name="viewModel">The <see cref="MarkersPageViewModel" /> instance that provides data and commands for the view.</param>
+    public MarkersPage(MarkersPageViewModel viewModel)
     {
         this.InitializeComponent();
         this.BindingContext = viewModel;

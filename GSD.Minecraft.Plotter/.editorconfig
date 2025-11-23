@@ -35,3 +35,6 @@ dotnet_diagnostic.IDE0072.severity = none # Add missing cases to switch expressi
 [*.cshtml.cs]
 dotnet_diagnostic.CA1812.severity = none # Avoid uninstantiated internal classes
 dotnet_diagnostic.SA1649.severity = none # File name must match type name
+
+[*.xaml.sg.cs]
+dotnet_diagnostic.CS1591.severity = none # Missing XML comment for publicly visible type or member 'Type_or_Member'

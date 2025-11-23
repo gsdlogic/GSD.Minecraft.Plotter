@@ -10,12 +10,12 @@ using System.Windows.Input;
 /// <summary>
 /// Represents the view model for managing and interacting with a collection of worlds.
 /// </summary>
-public class WorldsViewModel : ViewModelBase
+public class WorldsPageViewModel : ViewModelBase
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="WorldsViewModel" /> class.
+    /// Initializes a new instance of the <see cref="WorldsPageViewModel" /> class.
     /// </summary>
-    public WorldsViewModel()
+    public WorldsPageViewModel()
     {
         this.SelectWorldCommand = new Command<WorldViewModel>(this.OnSelectWorld);
         this.CreateWorldCommand = new Command(this.OnCreateWorld);

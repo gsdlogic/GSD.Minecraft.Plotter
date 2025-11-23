@@ -4,7 +4,7 @@
              xmlns:views="clr-namespace:GSD.Minecraft.Plotter.Views"
              xmlns:viewModels="clr-namespace:GSD.Minecraft.Plotter.ViewModels"
              x:Class="GSD.Minecraft.Plotter.Views.MapPage"
-             x:DataType="viewModels:MapViewModel"
+             x:DataType="viewModels:MapPageViewModel"
              Shell.NavBarIsVisible="False">
   <Grid>
     <Grid.RowDefinitions>

@@ -5,6 +5,7 @@
 namespace GSD.Minecraft.Plotter.ViewModels;
 
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Represents a drawable map with zoom and center point properties,  supporting the addition of markers and rendering capabilities.
@@ -38,9 +39,10 @@ public class MapDrawable : ViewModelBase, IDrawable
     }
 
     /// <summary>
-    /// Gets the collection of markers.
+    /// Gets or sets the collection of markers.
     /// </summary>
-    public ObservableCollection<MarkerViewModel> Markers { get; } = [];
+    [SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Collection replacement is required.")]
+    public ObservableCollection<MarkerViewModel> Markers { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the zoom level.
@@ -68,6 +70,25 @@ public class MapDrawable : ViewModelBase, IDrawable
         this.DrawPoints(canvas, camera);
 
         canvas.RestoreState();
+    }
+
+    /// <summary>
+    /// Synchronizes the state of the <see cref="MapDrawable" /> instance with the provided application state.
+    /// </summary>
+    /// <param name="appState">The current application state containing the world and its markers.</param>
+    public void Sync(AppState appState)
+    {
+        if (appState?.CurrentWorld is not { } world)
+        {
+            return;
+        }
+
+        this.Markers.Clear();
+
+        foreach (var marker in world.Markers)
+        {
+            this.Markers.Add(marker);
+        }
     }
 
     /// <summary>
