@@ -21,12 +21,12 @@ public class MapPageViewModel : ViewModelBase
         {
             if (e.PropertyName == nameof(AppState.CurrentWorld))
             {
-                this.MapDrawable.Markers = appState.CurrentWorld.Markers;
+                this.MapDrawable.Markers = appState.Markers;
                 this.Title = $"Map - {appState.CurrentWorld.Name}";
             }
         };
 
-        this.MapDrawable.Markers = appState.CurrentWorld.Markers;
+        this.MapDrawable.Markers = appState.Markers;
         this.Title = $"Map - {appState.CurrentWorld.Name}";
     }
 

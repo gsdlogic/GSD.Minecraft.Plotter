@@ -87,7 +87,7 @@ public class EditMarkerPageViewModel : ViewModelBase
             return;
         }
 
-        this.appState.CurrentWorld.Markers.Remove(this.Marker);
+        this.appState.Markers.Remove(this.Marker);
         await Shell.Current.CurrentPage.Navigation.PopModalAsync().ConfigureAwait(false);
     }
 
@@ -97,9 +97,9 @@ public class EditMarkerPageViewModel : ViewModelBase
     /// ReSharper disable once AsyncVoidMethod
     private async void Save()
     {
-        if (!this.appState.CurrentWorld.Markers.Contains(this.Marker))
+        if (!this.appState.Markers.Contains(this.Marker))
         {
-            this.appState.CurrentWorld.Markers.Add(this.Marker);
+            this.appState.Markers.Add(this.Marker);
         }
 
         await Shell.Current.CurrentPage.Navigation.PopModalAsync().ConfigureAwait(false);

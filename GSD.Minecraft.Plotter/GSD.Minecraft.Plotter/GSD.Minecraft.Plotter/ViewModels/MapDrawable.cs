@@ -73,25 +73,6 @@ public class MapDrawable : ViewModelBase, IDrawable
     }
 
     /// <summary>
-    /// Synchronizes the state of the <see cref="MapDrawable" /> instance with the provided application state.
-    /// </summary>
-    /// <param name="appState">The current application state containing the world and its markers.</param>
-    public void Sync(AppState appState)
-    {
-        if (appState?.CurrentWorld is not { } world)
-        {
-            return;
-        }
-
-        this.Markers.Clear();
-
-        foreach (var marker in world.Markers)
-        {
-            this.Markers.Add(marker);
-        }
-    }
-
-    /// <summary>
     /// Draws a grid onto the specified canvas using the provided camera settings.
     /// </summary>
     /// <param name="canvas">The canvas on which the grid will be drawn.</param>
@@ -167,15 +148,8 @@ public class MapDrawable : ViewModelBase, IDrawable
             var screenX = camera.WorldToScreenX(poi.X);
             var screenY = camera.WorldToScreenY(poi.Y);
 
-            if (poi.Icon != null)
-            {
-                canvas.DrawImage(poi.Icon, screenX - 16, screenY - 16, 32, 32);
-            }
-            else
-            {
-                canvas.FillColor = poi.FillColor;
-                canvas.FillCircle(screenX, screenY, 10);
-            }
+            canvas.FillColor = Colors.White;
+            canvas.FillCircle(screenX, screenY, 10);
 
             canvas.FontColor = Colors.White;
             canvas.FontSize = 14;

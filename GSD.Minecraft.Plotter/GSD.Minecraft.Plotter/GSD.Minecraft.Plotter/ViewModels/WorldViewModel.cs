@@ -12,9 +12,9 @@ using System.Collections.ObjectModel;
 public class WorldViewModel : ViewModelBase
 {
     /// <summary>
-    /// Gets the collection of markers.
+    /// Gets or sets the unique identifier for the world.
     /// </summary>
-    public ObservableCollection<MarkerViewModel> Markers { get; } = [];
+    public int Id { get; set; }
 
     /// <summary>
     /// Gets or sets the name of the world represented by this view model.

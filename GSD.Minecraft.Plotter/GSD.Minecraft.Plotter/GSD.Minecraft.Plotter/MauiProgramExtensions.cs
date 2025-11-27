@@ -4,7 +4,9 @@
 
 namespace GSD.Minecraft.Plotter;
 
+using GSD.Minecraft.Plotter.Services;
 using GSD.Minecraft.Plotter.ViewModels;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
@@ -34,6 +36,12 @@ public static class MauiProgramExtensions
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
+
+        builder.Services.AddDbContext<AppDbContext>(options =>
+        {
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "app.db");
+            options.UseSqlite($"Data Source={dbPath}");
+        });
 
         builder.Services.AddSingleton<AppState>();
         builder.Services.AddTransient<MapPageViewModel>();

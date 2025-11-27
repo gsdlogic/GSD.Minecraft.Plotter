@@ -4,30 +4,15 @@
 
 namespace GSD.Minecraft.Plotter.ViewModels;
 
-using IImage = Microsoft.Maui.Graphics.IImage;
-
 /// <summary>
 /// Represents a marker view model used for plotting markers on a map.
 /// </summary>
 public class MarkerViewModel : ViewModelBase
 {
     /// <summary>
-    /// Gets or sets the fill color used to visually represent the marker.
+    /// Gets or sets the unique identifier for the marker.
     /// </summary>
-    public Color FillColor
-    {
-        get => this.GetValue<Color>();
-        set => this.SetValue(value);
-    }
-
-    /// <summary>
-    /// Gets or sets the icon representing the marker.
-    /// </summary>
-    public IImage Icon
-    {
-        get => this.GetValue<IImage>();
-        set => this.SetValue(value);
-    }
+    public int Id { get; set; }
 
     /// <summary>
     /// Gets or sets the name of the marker.

@@ -30,13 +30,13 @@ public class MarkersPageViewModel : ViewModelBase
         {
             if (e.PropertyName == nameof(AppState.CurrentWorld))
             {
-                this.Markers = appState.CurrentWorld.Markers;
+                this.Markers = appState.Markers;
                 this.Title = $"Markers - {appState.CurrentWorld.Name}";
                 this.OnPropertyChanged(nameof(this.Markers));
             }
         };
 
-        this.Markers = appState.CurrentWorld.Markers;
+        this.Markers = appState.Markers;
         this.Title = $"Markers - {appState.CurrentWorld.Name}";
 
         this.AddMarkerCommand = new Command(this.AddMarker);
@@ -79,7 +79,6 @@ public class MarkersPageViewModel : ViewModelBase
             Y = 0,
             Z = 0,
             Name = $"Marker {this.Markers.Count + 1}",
-            FillColor = Colors.White,
         };
 
         var pageViewModel = new EditMarkerPageViewModel(this.appState, markerViewModel);
