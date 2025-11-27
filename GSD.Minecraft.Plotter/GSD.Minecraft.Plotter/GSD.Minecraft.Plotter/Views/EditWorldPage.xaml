@@ -2,22 +2,16 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewModels="clr-namespace:GSD.Minecraft.Plotter.ViewModels"
-             x:Class="GSD.Minecraft.Plotter.Views.EditMarkerPage"
-             x:DataType="viewModels:EditMarkerPageViewModel">
+             x:Class="GSD.Minecraft.Plotter.Views.EditWorldPage"
+             x:DataType="viewModels:EditWorldPageViewModel">
 
   <VerticalStackLayout Padding="20" Spacing="15">
 
     <Label Text="Marker Name" />
-    <Entry Text="{Binding Marker.Name}" />
+    <Entry Text="{Binding World.Name}" />
 
-    <Label Text="X Coordinate" />
-    <Entry Text="{Binding Marker.X}" Keyboard="Numeric" />
-
-    <Label Text="Y Coordinate" />
-    <Entry Text="{Binding Marker.Y}" Keyboard="Numeric" />
-
-    <Label Text="Z Coordinate" />
-    <Entry Text="{Binding Marker.Z}" Keyboard="Numeric" />
+    <Label Text="Seed" />
+    <Entry Text="{Binding World.Seed}" />
 
     <HorizontalStackLayout Spacing="10">
       <Button Text="Save" Command="{Binding SaveCommand}" />

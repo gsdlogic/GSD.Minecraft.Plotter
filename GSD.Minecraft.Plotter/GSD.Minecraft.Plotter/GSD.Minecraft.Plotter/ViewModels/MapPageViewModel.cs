@@ -22,14 +22,25 @@ public class MapPageViewModel : ViewModelBase
             if (e.PropertyName == nameof(AppState.CurrentWorld))
             {
                 this.MapDrawable.Markers = appState.CurrentWorld.Markers;
+                this.Title = $"Map - {appState.CurrentWorld.Name}";
             }
         };
 
         this.MapDrawable.Markers = appState.CurrentWorld.Markers;
+        this.Title = $"Map - {appState.CurrentWorld.Name}";
     }
 
     /// <summary>
     /// Gets or sets the map drawable.
     /// </summary>
     public MapDrawable MapDrawable { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the title of the map page, which dynamically reflects the name of the current world.
+    /// </summary>
+    public string Title
+    {
+        get => this.GetValue<string>();
+        set => this.SetValue(value);
+    }
 }

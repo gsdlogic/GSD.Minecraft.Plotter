@@ -5,18 +5,9 @@
              xmlns:viewModels="clr-namespace:GSD.Minecraft.Plotter.ViewModels"
              x:Class="GSD.Minecraft.Plotter.Views.MapPage"
              x:DataType="viewModels:MapPageViewModel"
-             Shell.NavBarIsVisible="False">
-  <Grid>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="*" />
-      <RowDefinition Height="Auto" />
-    </Grid.RowDefinitions>
-    <views:MapView Grid.Row="0" x:Name="MapView" MapDrawable="{Binding MapDrawable}" />
-    <StackLayout Grid.Row="1" Padding="10" BackgroundColor="#AA000000">
-      <Label Text="{Binding MapDrawable.Zoom, StringFormat='Zoom: {0:F2}'}" TextColor="White" />
-      <Label Text="{Binding MapDrawable.CenterX, StringFormat='OffsetX: {0:F0}'}" TextColor="White" />
-      <Label Text="{Binding MapDrawable.CenterY, StringFormat='OffsetY: {0:F0}'}" TextColor="White" />
-      <Label Text="{Binding MapDrawable.Markers.Count, StringFormat='Markers: {0}'}" TextColor="White" />
-    </StackLayout>
-  </Grid>
+             Shell.NavBarIsVisible="True"
+             Title="{Binding Title}">
+  
+  <views:MapView x:Name="MapView" MapDrawable="{Binding MapDrawable}" />
+  
 </ContentPage>

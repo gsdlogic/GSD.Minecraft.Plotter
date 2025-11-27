@@ -31,12 +31,16 @@ public class MarkersPageViewModel : ViewModelBase
             if (e.PropertyName == nameof(AppState.CurrentWorld))
             {
                 this.Markers = appState.CurrentWorld.Markers;
+                this.Title = $"Markers - {appState.CurrentWorld.Name}";
                 this.OnPropertyChanged(nameof(this.Markers));
             }
         };
 
         this.Markers = appState.CurrentWorld.Markers;
+        this.Title = $"Markers - {appState.CurrentWorld.Name}";
+
         this.AddMarkerCommand = new Command(this.AddMarker);
+        this.EditMarkerCommand = new Command<MarkerViewModel>(this.EditMarker);
     }
 
     /// <summary>
@@ -45,9 +49,23 @@ public class MarkersPageViewModel : ViewModelBase
     public ICommand AddMarkerCommand { get; }
 
     /// <summary>
+    /// Gets the command that allows editing an existing marker in the collection of markers.
+    /// </summary>
+    public ICommand EditMarkerCommand { get; }
+
+    /// <summary>
     /// Gets the collection of markers associated with the current world.
     /// </summary>
     public ObservableCollection<MarkerViewModel> Markers { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the title of the map page, which dynamically reflects the name of the current world.
+    /// </summary>
+    public string Title
+    {
+        get => this.GetValue<string>();
+        set => this.SetValue(value);
+    }
 
     /// <summary>
     /// Adds a new marker to the collection of markers in the current world.
@@ -55,7 +73,7 @@ public class MarkersPageViewModel : ViewModelBase
     /// ReSharper disable once AsyncVoidMethod
     private async void AddMarker()
     {
-        var marker = new MarkerViewModel
+        var markerViewModel = new MarkerViewModel
         {
             X = 0,
             Y = 0,
@@ -64,9 +82,22 @@ public class MarkersPageViewModel : ViewModelBase
             FillColor = Colors.White,
         };
 
-        var viewModel = new EditMarkerPageViewModel(this.appState, marker);
+        var pageViewModel = new EditMarkerPageViewModel(this.appState, markerViewModel);
+        var page = new EditMarkerPage(pageViewModel);
 
-        var page = new EditMarkerPage(viewModel);
+        await Shell.Current.CurrentPage.Navigation.PushModalAsync(page).ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Edits the specified marker in the current world.
+    /// </summary>
+    /// <param name="markerViewModel">The marker to be edited, represented by a <see cref="MarkerViewModel" /> instance.</param>
+    /// ReSharper disable once AsyncVoidMethod
+    private async void EditMarker(MarkerViewModel markerViewModel)
+    {
+        var pageViewModel = new EditMarkerPageViewModel(this.appState, markerViewModel);
+        var page = new EditMarkerPage(pageViewModel);
+
         await Shell.Current.CurrentPage.Navigation.PushModalAsync(page).ConfigureAwait(true);
     }
 }

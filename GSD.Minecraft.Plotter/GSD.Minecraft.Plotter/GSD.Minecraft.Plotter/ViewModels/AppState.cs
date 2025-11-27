@@ -4,6 +4,8 @@
 
 namespace GSD.Minecraft.Plotter.ViewModels;
 
+using System.Collections.ObjectModel;
+
 /// <summary>
 /// Represents the application state, providing properties and functionality to manage and interact with the current state of the application.
 /// </summary>
@@ -19,11 +21,7 @@ public class AppState : ViewModelBase
             Name = "Default World",
         };
 
-        this.CurrentWorld.Markers.Add(new MarkerViewModel { Name = "Center", X = 0, Y = 0, FillColor = Colors.White });
-        this.CurrentWorld.Markers.Add(new MarkerViewModel { Name = "Top left", X = -8, Y = -8, FillColor = Colors.Red });
-        this.CurrentWorld.Markers.Add(new MarkerViewModel { Name = "Top right", X = 8, Y = -8, FillColor = Colors.Yellow });
-        this.CurrentWorld.Markers.Add(new MarkerViewModel { Name = "Bottom left", X = -8, Y = 8, FillColor = Colors.Cyan });
-        this.CurrentWorld.Markers.Add(new MarkerViewModel { Name = "Bottom right", X = 8, Y = 8, FillColor = Colors.LightGreen });
+        this.Worlds.Add(this.CurrentWorld);
     }
 
     /// <summary>
@@ -34,4 +32,9 @@ public class AppState : ViewModelBase
         get => this.GetValue<WorldViewModel>();
         set => this.SetValue(value);
     }
+
+    /// <summary>
+    /// Gets the collection of worlds available in the application.
+    /// </summary>
+    public ObservableCollection<WorldViewModel> Worlds { get; } = [];
 }

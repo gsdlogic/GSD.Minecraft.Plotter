@@ -1,22 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:views="clr-namespace:GSD.Minecraft.Plotter.Views"
+             xmlns:viewModels="clr-namespace:GSD.Minecraft.Plotter.ViewModels"
              x:Class="GSD.Minecraft.Plotter.Views.WorldsPage"
-             Shell.NavBarIsVisible="False">
-  <StackLayout Padding="10">
-    <CollectionView ItemsSource="{Binding Worlds}">
+             x:DataType="viewModels:WorldsPageViewModel"
+             Shell.NavBarIsVisible="True">
+
+  <Grid RowDefinitions="Auto,Auto,*">
+
+    <Button Grid.Row="0" Text="Create World" Command="{Binding CreateWorldCommand}" Margin="10" />
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,300" Padding="10" BackgroundColor="Transparent">
+      <Label Text="Name" Grid.Column="0" TextColor="White" FontAttributes="Bold" />
+      <Label Text="Seed" Grid.Column="1" TextColor="White" FontAttributes="Bold" HorizontalOptions="End" />
+    </Grid>
+
+    <CollectionView Grid.Row="2" ItemsSource="{Binding Worlds}">
       <CollectionView.ItemTemplate>
-        <DataTemplate>
-          <Frame Padding="10" Margin="5" BackgroundColor="#222">
-            <StackLayout Orientation="Horizontal">
-              <Label Text="{Binding Name}" TextColor="White" VerticalOptions="Center" />
-              <Button Text="Select" Command="{Binding Source={RelativeSource AncestorType={x:Type views:WorldsPage}}, Path=BindingContext.SelectWorldCommand}" CommandParameter="{Binding .}" HorizontalOptions="End" />
-            </StackLayout>
-          </Frame>
+        <DataTemplate x:DataType="viewModels:WorldViewModel">
+          <Grid ColumnDefinitions="*,300" Padding="10" BackgroundColor="Transparent">
+            <Grid.GestureRecognizers>
+              <TapGestureRecognizer
+                Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:WorldsPageViewModel}}, Path=EditWorldCommand}"
+                CommandParameter="{Binding}" />
+            </Grid.GestureRecognizers>
+            <Label Grid.Column="0" Text="{Binding Name}" />
+            <Label Grid.Column="1" Text="{Binding Seed}" TextColor="White" HorizontalOptions="End" />
+          </Grid>
         </DataTemplate>
       </CollectionView.ItemTemplate>
     </CollectionView>
-    <Button Text="Create New World" Command="{Binding CreateWorldCommand}" />
-  </StackLayout>
+
+  </Grid>
+
 </ContentPage>

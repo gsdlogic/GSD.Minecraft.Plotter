@@ -27,6 +27,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Views\EditWorldPage.xaml.cs">
+	    <DependentUpon>EditWorldPage.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Views\EditMarkerPage.xaml.cs">
 	    <DependentUpon>EditMarkerPage.xaml</DependentUpon>
 	  </Compile>
@@ -42,6 +45,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Views\EditWorldPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\EditMarkerPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

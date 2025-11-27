@@ -8,6 +8,8 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseMaui>true</UseMaui>
+		<ProvisioningType>automatic</ProvisioningType>
+		<CodesignKey>iPhone Developer</CodesignKey>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -24,4 +24,13 @@ public class WorldViewModel : ViewModelBase
         get => this.GetValue<string>();
         set => this.SetValue(value);
     }
+
+    /// <summary>
+    /// Gets or sets the seed value for the world.
+    /// </summary>
+    public string Seed
+    {
+        get => this.GetValue<string>();
+        set => this.SetValue(value);
+    }
 }
