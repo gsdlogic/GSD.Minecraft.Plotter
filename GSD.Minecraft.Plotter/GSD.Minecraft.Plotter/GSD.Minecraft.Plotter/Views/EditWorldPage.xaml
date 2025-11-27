@@ -13,11 +13,11 @@
     <Label Text="Seed" />
     <Entry Text="{Binding World.Seed}" />
 
-    <HorizontalStackLayout Spacing="10">
-      <Button Text="Save" Command="{Binding SaveCommand}" />
-      <Button Text="Cancel" Command="{Binding CancelCommand}" />
-      <Button Text="Delete" BackgroundColor="Red" Command="{Binding DeleteCommand}" />
-    </HorizontalStackLayout>
+    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+      <Button Grid.Column="0" Text="Delete" BackgroundColor="Red" Command="{Binding DeleteCommand}" />
+      <Button Grid.Column="2" Text="Save" Command="{Binding SaveCommand}" />
+      <Button Grid.Column="3" Text="Cancel" BackgroundColor="Gray" Command="{Binding CancelCommand}" />
+    </Grid>
 
   </VerticalStackLayout>
 

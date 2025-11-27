@@ -6,6 +6,11 @@ namespace GSD.Minecraft.Plotter.WinUI;
 
 using GSD.Minecraft.Plotter.Abstractions;
 using GSD.Minecraft.Plotter.WinUI.Implementations;
+using Microsoft.Maui.LifecycleEvents;
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
+using Windows.Graphics;
+using WinRT.Interop;
 
 /// <summary>
 /// Provides methods for creating and configuring the .NET MAUI application.
@@ -21,7 +26,26 @@ public static class MauiProgram
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
-        builder.UseSharedMauiApp();
+
+        builder.UseSharedMauiApp()
+            .ConfigureLifecycleEvents(events =>
+            {
+                events.AddWindows(windows =>
+                {
+                    windows.OnWindowCreated(window =>
+                    {
+                        const int Width = 800;
+                        const int Height = 1200;
+
+                        var hwnd = WindowNative.GetWindowHandle(window);
+                        var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
+                        var appWindow = AppWindow.GetFromWindowId(windowId);
+
+                        appWindow.Resize(new SizeInt32(Width, Height));
+                    });
+                });
+            });
+
         builder.Services.AddSingleton<IPlatformZoomHandler, WindowsZoomHandler>();
 
         return builder.Build();
