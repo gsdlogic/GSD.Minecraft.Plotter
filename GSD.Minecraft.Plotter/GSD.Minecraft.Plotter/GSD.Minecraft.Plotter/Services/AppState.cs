@@ -81,6 +81,7 @@ public class AppState
         var dbContext = await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
 
         marker.World = await this.GetCurrentWorldAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        marker.WorldId = marker.World.Id;
 
         var existingMarker = await dbContext.Markers.FindAsync([marker.Id], cancellationToken).ConfigureAwait(false);
 

@@ -4,6 +4,7 @@
 
 namespace GSD.Minecraft.Plotter.ViewModels;
 
+using System.Windows.Input;
 using GSD.Minecraft.Plotter.Services;
 
 /// <summary>
@@ -26,14 +27,37 @@ public class MapPageViewModel : ViewModelBase
         this.appState.CurrentWorldChanged += this.OnCurrentWorldChanged;
         this.appState.MarkersChanged += this.OnMarkersChanged;
 
+        this.OverworldCommand = new Command(() => this.MapLayout = new OverworldMapLayout());
+        this.NetherCommand = new Command(() => this.MapLayout = new NetherMapLayout());
+        this.MapLayout = new OverworldMapLayout();
+
         this.UpdateMarkers();
         this.UpdateTitle();
     }
 
     /// <summary>
-    /// Gets or sets the map drawable.
+    /// Gets the map drawable.
     /// </summary>
-    public MapDrawable MapDrawable { get; set; } = new();
+    public MapDrawable MapDrawable { get; } = new();
+
+    /// <summary>
+    /// Gets or sets the current map layout used for plotting markers on the map.
+    /// </summary>
+    public IMapLayout MapLayout
+    {
+        get => this.GetValue<IMapLayout>();
+        set => this.SetValue(value);
+    }
+
+    /// <summary>
+    /// Gets the command to set the layout relative to the Nether map.
+    /// </summary>
+    public ICommand NetherCommand { get; }
+
+    /// <summary>
+    /// Gets the command to set the layout relative to the Overworld map.
+    /// </summary>
+    public ICommand OverworldCommand { get; }
 
     /// <summary>
     /// Gets or sets the title of the map page, which dynamically reflects the name of the current world.

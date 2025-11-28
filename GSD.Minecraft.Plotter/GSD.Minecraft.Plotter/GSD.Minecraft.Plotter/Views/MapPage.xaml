@@ -7,7 +7,11 @@
              x:DataType="viewModels:MapPageViewModel"
              Shell.NavBarIsVisible="True"
              Title="{Binding Title}">
-  
-  <views:MapView x:Name="MapView" MapDrawable="{Binding MapDrawable}" />
-  
+  <ContentPage.ToolbarItems>
+    <ToolbarItem Text="Overworld" Order="Secondary" Priority="0" Command="{Binding OverworldCommand}" />
+    <ToolbarItem Text="Nether" Order="Secondary" Priority="1" Command="{Binding NetherCommand}" />
+  </ContentPage.ToolbarItems>
+
+  <views:MapView x:Name="MapView" MapDrawable="{Binding MapDrawable}" MapLayout="{Binding MapLayout}" />
+
 </ContentPage>

@@ -38,6 +38,11 @@ public class MapDrawable : ViewModelBase, IDrawable
     }
 
     /// <summary>
+    /// Gets or sets the map layout.
+    /// </summary>
+    public IMapLayout Layout { get; set; }
+
+    /// <summary>
     /// Gets the collection of markers.
     /// </summary>
     public Collection<MarkerViewModel> Markers { get; } = [];
@@ -141,17 +146,21 @@ public class MapDrawable : ViewModelBase, IDrawable
     /// <param name="camera">The camera that provides the transformation from world coordinates to screen coordinates.</param>
     private void DrawPoints(ICanvas canvas, Camera camera)
     {
-        foreach (var poi in this.Markers)
+        foreach (var marker in this.Markers)
         {
-            var screenX = camera.WorldToScreenX(poi.X);
-            var screenY = camera.WorldToScreenY(poi.Y);
+            var point = this.Layout?.GetMapCoordinate(marker) ?? (marker.X, marker.Y);
+            var floorX = (float)Math.Floor(point.X);
+            var floorY = (float)Math.Floor(point.Y);
+
+            var screenX = camera.WorldToScreenX(floorX);
+            var screenY = camera.WorldToScreenY(floorY);
 
             canvas.FillColor = Colors.White;
             canvas.FillCircle(screenX, screenY, 10);
 
             canvas.FontColor = Colors.White;
             canvas.FontSize = 14;
-            canvas.DrawString($"{poi.X},{poi.Y}", screenX + 12, screenY - 8, HorizontalAlignment.Left);
+            canvas.DrawString($"{floorX},{floorY}", screenX + 12, screenY - 8, HorizontalAlignment.Left);
         }
     }
 

@@ -24,6 +24,16 @@ public partial class MapView
             propertyChanged: OnMapDrawableChanged);
 
     /// <summary>
+    /// Identifies the <see cref="IMapLayout" /> bindable property, which represents the drawable content of the map.
+    /// </summary>
+    public static readonly BindableProperty MapLayoutProperty =
+        BindableProperty.Create(
+            nameof(MapLayout),
+            typeof(IMapLayout),
+            typeof(MapView),
+            propertyChanged: OnMapLayoutChanged);
+
+    /// <summary>
     /// Indicates whether a pan gesture has started.
     /// </summary>
     private bool panStarted;
@@ -56,6 +66,15 @@ public partial class MapView
     }
 
     /// <summary>
+    /// Gets or sets the <see cref="IMapLayout" /> instance that represents the drawable content of the map.
+    /// </summary>
+    public IMapLayout MapLayout
+    {
+        get => (IMapLayout)this.GetValue(MapLayoutProperty);
+        set => this.SetValue(MapLayoutProperty, value);
+    }
+
+    /// <summary>
     /// Attaches a platform zoom handler.
     /// </summary>
     /// <param name="platformZoomHandler">The platform zoom handler to attach.</param>
@@ -74,10 +93,27 @@ public partial class MapView
     /// <param name="newValue">The new value of the property.</param>
     private static void OnMapDrawableChanged(BindableObject bindable, object oldValue, object newValue)
     {
-        var view = (MapView)bindable;
+        if (bindable is MapView view && newValue is IDrawable drawable)
+        {
+            view.GraphicsView.Drawable = drawable;
+            view.GraphicsView.Invalidate();
+        }
+    }
 
-        view.GraphicsView.Drawable = (IDrawable)newValue;
-        view.GraphicsView.Invalidate();
+    /// <summary>
+    /// Handles changes to the <see cref="MapView.MapLayoutProperty" /> bindable property.
+    /// Updates the <see cref="MapDrawable.Layout" /> with the new layout and invalidates the graphics view to reflect the changes.
+    /// </summary>
+    /// <param name="bindable">The bindable object that the property belongs to, expected to be of type <see cref="MapView" />.</param>
+    /// <param name="oldValue">The previous value of the property.</param>
+    /// <param name="newValue">The new value of the property.</param>
+    private static void OnMapLayoutChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        if (bindable is MapView view && view.GraphicsView.Drawable is MapDrawable drawable)
+        {
+            drawable.Layout = (IMapLayout)newValue;
+            view.GraphicsView.Invalidate();
+        }
     }
 
     /// <summary>
