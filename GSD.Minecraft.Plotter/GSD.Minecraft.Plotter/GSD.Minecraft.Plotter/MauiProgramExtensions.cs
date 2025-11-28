@@ -37,11 +37,8 @@ public static class MauiProgramExtensions
         builder.Logging.AddDebug();
 #endif
 
-        builder.Services.AddDbContext<AppDbContext>(options =>
-        {
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "app.db");
-            options.UseSqlite($"Data Source={dbPath}");
-        });
+        builder.Services.AddDbContextFactory<AppDbContext>(options =>
+            options.UseSqlite($"Filename={Path.Combine(FileSystem.AppDataDirectory, "app.db")}"));
 
         builder.Services.AddSingleton<AppState>();
         builder.Services.AddTransient<MapPageViewModel>();

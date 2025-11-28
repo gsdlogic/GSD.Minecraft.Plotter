@@ -20,9 +20,9 @@ public class AppState
     private const string CurrentWorldIdSettingKey = "CurrentWorldId";
 
     /// <summary>
-    /// The <see cref="AppDbContext" /> instance used to manage and interact with the application's database.
+    /// The factory for creating instances of <see cref="AppDbContext" />, used to manage and interact with the application's database.
     /// </summary>
-    private readonly AppDbContext dbContext;
+    private readonly IDbContextFactory<AppDbContext> dbContextFactory;
 
     /// <summary>
     /// The current world.
@@ -47,11 +47,10 @@ public class AppState
     /// <summary>
     /// Initializes a new instance of the <see cref="AppState" /> class with the specified database context.
     /// </summary>
-    /// <param name="dbContext">The <see cref="AppDbContext" /> instance used to manage and interact with the application's database.</param>
-    public AppState(AppDbContext dbContext)
+    /// <param name="dbContextFactory">The factory for creating instances of <see cref="AppDbContext" />, used to manage and interact with the application's database.</param>
+    public AppState(IDbContextFactory<AppDbContext> dbContextFactory)
     {
-        // TODO: Convert to IDbContextFactory<AppDbContext>.
-        this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
     }
 
     /// <summary>
@@ -79,20 +78,22 @@ public class AppState
     {
         ArgumentNullException.ThrowIfNull(marker);
 
-        marker.World = await this.GetCurrentWorldAsync(cancellationToken).ConfigureAwait(false);
+        var dbContext = await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
 
-        var existingMarker = await this.dbContext.Markers.FindAsync([marker.Id], cancellationToken).ConfigureAwait(false);
+        marker.World = await this.GetCurrentWorldAsync(dbContext, cancellationToken).ConfigureAwait(false);
+
+        var existingMarker = await dbContext.Markers.FindAsync([marker.Id], cancellationToken).ConfigureAwait(false);
 
         if (existingMarker != null)
         {
-            this.dbContext.Entry(existingMarker).CurrentValues.SetValues(marker);
+            dbContext.Entry(existingMarker).CurrentValues.SetValues(marker);
         }
         else
         {
-            this.dbContext.Markers.Add(marker);
+            dbContext.Markers.Add(marker);
         }
 
-        await this.dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         this.currentWorldMarkers = null;
         this.OnMarkersChanged();
@@ -108,21 +109,21 @@ public class AppState
     {
         ArgumentNullException.ThrowIfNull(world);
 
-        await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+        var dbContext = await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
 
-        var existingWorld = await this.dbContext.Worlds.FindAsync([world.Id], cancellationToken).ConfigureAwait(false);
+        var existingWorld = await dbContext.Worlds.FindAsync([world.Id], cancellationToken).ConfigureAwait(false);
 
         if (existingWorld != null)
         {
-            this.dbContext.Entry(existingWorld).CurrentValues.SetValues(world);
+            dbContext.Entry(existingWorld).CurrentValues.SetValues(world);
         }
         else
         {
-            this.dbContext.Worlds.Add(world);
+            dbContext.Worlds.Add(world);
         }
 
-        await this.dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        await this.SetCurrentWorldIdAsync(world.Id, cancellationToken).ConfigureAwait(false);
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await SetCurrentWorldIdAsync(dbContext, world.Id, cancellationToken).ConfigureAwait(false);
 
         this.worlds = null;
         this.currentWorld = null;
@@ -140,9 +141,9 @@ public class AppState
     /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
     public async Task DeleteMarkerAsync(int id, CancellationToken cancellationToken = default)
     {
-        await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+        var dbContext = await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
 
-        var marker = await this.dbContext.Markers
+        var marker = await dbContext.Markers
             .FindAsync([id], cancellationToken)
             .ConfigureAwait(false);
 
@@ -151,8 +152,8 @@ public class AppState
             return;
         }
 
-        this.dbContext.Markers.Remove(marker);
-        await this.dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        dbContext.Markers.Remove(marker);
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         this.currentWorldMarkers = null;
         this.OnMarkersChanged();
@@ -166,9 +167,9 @@ public class AppState
     /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
     public async Task DeleteWorldAsync(int id, CancellationToken cancellationToken = default)
     {
-        await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+        var dbContext = await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
 
-        var world = await this.dbContext.Worlds
+        var world = await dbContext.Worlds
             .FindAsync([id], cancellationToken)
             .ConfigureAwait(false);
 
@@ -177,18 +178,18 @@ public class AppState
             return;
         }
 
-        this.dbContext.Worlds.Remove(world);
-        await this.dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        dbContext.Worlds.Remove(world);
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         if (this.currentWorld?.Id == world.Id)
         {
-            var newWorld = await this.dbContext.Worlds
+            var newWorld = await dbContext.Worlds
                 .FirstOrDefaultAsync(cancellationToken)
                 .ConfigureAwait(false);
 
             if (newWorld != null)
             {
-                await this.SetCurrentWorldIdAsync(newWorld.Id, cancellationToken).ConfigureAwait(false);
+                await SetCurrentWorldIdAsync(dbContext, newWorld.Id, cancellationToken).ConfigureAwait(false);
             }
 
             this.worlds = null;
@@ -212,33 +213,13 @@ public class AppState
     /// <returns>A <see cref="Task{TResult}" /> representing the asynchronous operation, with a result of type <see cref="World" /> representing the current world.</returns>
     public async Task<World> GetCurrentWorldAsync(CancellationToken cancellationToken = default)
     {
-        this.currentWorld ??= await Factory().ConfigureAwait(false);
-        return this.currentWorld;
-
-        async Task<World> Factory()
+        if (this.currentWorld != null)
         {
-            await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
-
-            var worldIdSetting = await this.dbContext.Settings
-                .FindAsync([CurrentWorldIdSettingKey], cancellationToken)
-                .ConfigureAwait(false);
-
-            if ((worldIdSetting == null) || !int.TryParse(worldIdSetting.Value, out var worldId))
-            {
-                return await this.CreateDefaultWorldAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            var world = await this.dbContext.Worlds
-                .FindAsync([worldId], cancellationToken)
-                .ConfigureAwait(false);
-
-            if (world == null)
-            {
-                return await this.CreateDefaultWorldAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            return world;
+            return this.currentWorld;
         }
+
+        var dbContext = await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+        return await this.GetCurrentWorldAsync(dbContext, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -255,16 +236,16 @@ public class AppState
 
         async Task<IList<Marker>> Factory()
         {
-            await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+            var dbContext = await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
 
-            var world = await this.GetCurrentWorldAsync(cancellationToken).ConfigureAwait(false);
+            var world = await this.GetCurrentWorldAsync(dbContext, cancellationToken).ConfigureAwait(false);
 
             if (world == null)
             {
                 return [];
             }
 
-            return await this.dbContext.Markers
+            return await dbContext.Markers
                 .Where(m => m.WorldId == world.Id)
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
@@ -285,15 +266,15 @@ public class AppState
 
         async Task<IList<World>> Factory()
         {
-            await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+            var dbContext = await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
 
-            var results = await this.dbContext.Worlds
+            var results = await dbContext.Worlds
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
 
             if (results.Count == 0)
             {
-                var world = await this.CreateDefaultWorldAsync(cancellationToken).ConfigureAwait(false);
+                var world = await CreateDefaultWorldAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 return [world];
             }
 
@@ -328,65 +309,36 @@ public class AppState
     /// <summary>
     /// Creates a default world with predefined settings and saves it to the database.
     /// </summary>
+    /// <param name="dbContext">The <see cref="AppDbContext" />, used to manage and interact with the application's database.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken" /> that can be used to cancel the asynchronous operation.</param>
     /// <returns>
     /// A <see cref="Task" /> representing any asynchronous operation. The task result contains the created <see cref="World" /> instance.
     /// </returns>
-    private async Task<World> CreateDefaultWorldAsync(CancellationToken cancellationToken)
+    private static async Task<World> CreateDefaultWorldAsync(AppDbContext dbContext, CancellationToken cancellationToken)
     {
         var defaultWorld = new World
         {
             Name = "Default World",
         };
 
-        this.dbContext.Worlds.Add(defaultWorld);
+        dbContext.Worlds.Add(defaultWorld);
 
-        await this.dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        await this.SetCurrentWorldIdAsync(defaultWorld.Id, cancellationToken).ConfigureAwait(false);
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await SetCurrentWorldIdAsync(dbContext, defaultWorld.Id, cancellationToken).ConfigureAwait(false);
 
         return defaultWorld;
     }
 
     /// <summary>
-    /// Asynchronously initializes the application state, performing any necessary setup or loading operations.
-    /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken" /> that can be used to cancel the asynchronous operation.</param>
-    /// <returns>
-    /// A <see cref="Task" /> representing the asynchronous initialization operation.
-    /// </returns>
-    private async Task EnsureInitializedAsync(CancellationToken cancellationToken = default)
-    {
-        if (this.isInitialized)
-        {
-            return;
-        }
-
-        this.isInitialized = true;
-
-        if (await this.dbContext.Database.EnsureCreatedAsync(cancellationToken).ConfigureAwait(false))
-        {
-            var databaseVersion = new Setting
-            {
-                Key = "DatabaseVersion",
-                Value = new Version(1, 0, 0, 0).ToString(),
-            };
-
-            this.dbContext.Settings.Add(databaseVersion);
-
-            await this.dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            await this.CreateDefaultWorldAsync(cancellationToken).ConfigureAwait(false);
-        }
-    }
-
-    /// <summary>
     /// Sets the current world ID in the application's database.
     /// </summary>
+    /// <param name="dbContext">The <see cref="AppDbContext" />, used to manage and interact with the application's database.</param>
     /// <param name="worldId">The ID of the world to set as the current world.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken" /> that can be used to cancel the asynchronous operation.</param>
-    /// <returns>A <see cref="Task" /> that represents the asynchronous operation.</returns>
-    private async Task SetCurrentWorldIdAsync(int worldId, CancellationToken cancellationToken)
+    /// <returns>A <see cref="Task" /> that represents the asynchronous operation whose result is the <see cref="AppDbContext" />, used to manage and interact with the application's database.</returns>
+    private static async Task SetCurrentWorldIdAsync(AppDbContext dbContext, int worldId, CancellationToken cancellationToken)
     {
-        var worldIdSetting = await this.dbContext.Settings
+        var worldIdSetting = await dbContext.Settings
             .FindAsync([CurrentWorldIdSettingKey], cancellationToken)
             .ConfigureAwait(false);
 
@@ -398,13 +350,83 @@ public class AppState
                 Value = worldId.ToString(CultureInfo.InvariantCulture),
             };
 
-            this.dbContext.Settings.Add(worldIdSetting);
+            dbContext.Settings.Add(worldIdSetting);
         }
         else
         {
             worldIdSetting.Value = worldId.ToString(CultureInfo.InvariantCulture);
         }
 
-        await this.dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Asynchronously initializes the application state, performing any necessary setup or loading operations.
+    /// </summary>
+    /// <param name="cancellationToken">A <see cref="CancellationToken" /> that can be used to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A <see cref="Task" /> representing the asynchronous initialization operation whose result is a <see cref="AppDbContext" />, used to manage and interact with the application's database.
+    /// </returns>
+    private async Task<AppDbContext> EnsureInitializedAsync(CancellationToken cancellationToken = default)
+    {
+        var dbContext = await this.dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
+
+        if (this.isInitialized)
+        {
+            return dbContext;
+        }
+
+        this.isInitialized = true;
+
+        if (await dbContext.Database.EnsureCreatedAsync(cancellationToken).ConfigureAwait(false))
+        {
+            var databaseVersion = new Setting
+            {
+                Key = "DatabaseVersion",
+                Value = new Version(1, 0, 0, 0).ToString(),
+            };
+
+            dbContext.Settings.Add(databaseVersion);
+
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await CreateDefaultWorldAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        }
+
+        return dbContext;
+    }
+
+    /// <summary>
+    /// Retrieves the current world from the application's state asynchronously.
+    /// </summary>
+    /// <param name="dbContext">The <see cref="AppDbContext" />, used to manage and interact with the application's database.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken" /> that can be used to cancel the asynchronous operation.</param>
+    /// <returns>A <see cref="Task{TResult}" /> representing the asynchronous operation, with a result of type <see cref="World" /> representing the current world.</returns>
+    private async Task<World> GetCurrentWorldAsync(AppDbContext dbContext, CancellationToken cancellationToken = default)
+    {
+        this.currentWorld ??= await Factory().ConfigureAwait(false);
+        return this.currentWorld;
+
+        async Task<World> Factory()
+        {
+            var worldIdSetting = await dbContext.Settings
+                .FindAsync([CurrentWorldIdSettingKey], cancellationToken)
+                .ConfigureAwait(false);
+
+            if ((worldIdSetting == null) || !int.TryParse(worldIdSetting.Value, out var worldId))
+            {
+                return await CreateDefaultWorldAsync(dbContext, cancellationToken).ConfigureAwait(false);
+            }
+
+            var world = await dbContext.Worlds
+                .FindAsync([worldId], cancellationToken)
+                .ConfigureAwait(false);
+
+            if (world == null)
+            {
+                return await CreateDefaultWorldAsync(dbContext, cancellationToken).ConfigureAwait(false);
+            }
+
+            return world;
+        }
     }
 }
