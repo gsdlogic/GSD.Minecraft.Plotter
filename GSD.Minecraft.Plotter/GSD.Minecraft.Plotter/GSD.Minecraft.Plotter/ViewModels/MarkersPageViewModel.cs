@@ -6,6 +6,7 @@ namespace GSD.Minecraft.Plotter.ViewModels;
 
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using GSD.Minecraft.Plotter.Services;
 using GSD.Minecraft.Plotter.Views;
 
 /// <summary>
@@ -25,19 +26,11 @@ public class MarkersPageViewModel : ViewModelBase
     public MarkersPageViewModel(AppState appState)
     {
         this.appState = appState ?? throw new ArgumentNullException(nameof(appState));
+        this.appState.CurrentWorldChanged += this.OnCurrentWorldChanged;
+        this.appState.MarkersChanged += this.OnMarkersChanged;
 
-        appState.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(AppState.CurrentWorld))
-            {
-                this.Markers = appState.Markers;
-                this.Title = $"Markers - {appState.CurrentWorld.Name}";
-                this.OnPropertyChanged(nameof(this.Markers));
-            }
-        };
-
-        this.Markers = appState.Markers;
-        this.Title = $"Markers - {appState.CurrentWorld.Name}";
+        this.UpdateMarkers();
+        this.UpdateTitle();
 
         this.AddMarkerCommand = new Command(this.AddMarker);
         this.EditMarkerCommand = new Command<MarkerViewModel>(this.EditMarker);
@@ -56,7 +49,7 @@ public class MarkersPageViewModel : ViewModelBase
     /// <summary>
     /// Gets the collection of markers associated with the current world.
     /// </summary>
-    public ObservableCollection<MarkerViewModel> Markers { get; private set; }
+    public ObservableCollection<MarkerViewModel> Markers { get; } = [];
 
     /// <summary>
     /// Gets or sets the title of the map page, which dynamically reflects the name of the current world.
@@ -75,9 +68,6 @@ public class MarkersPageViewModel : ViewModelBase
     {
         var markerViewModel = new MarkerViewModel
         {
-            X = 0,
-            Y = 0,
-            Z = 0,
             Name = $"Marker {this.Markers.Count + 1}",
         };
 
@@ -98,5 +88,51 @@ public class MarkersPageViewModel : ViewModelBase
         var page = new EditMarkerPage(pageViewModel);
 
         await Shell.Current.CurrentPage.Navigation.PushModalAsync(page).ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Occurs when the current world in the application state changes.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">An <see cref="EventArgs" /> containing no event data.</param>
+    private void OnCurrentWorldChanged(object sender, EventArgs e)
+    {
+        this.UpdateTitle();
+    }
+
+    /// <summary>
+    /// Occurs when the collection of markers in the application state is modified.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">An <see cref="EventArgs" /> that contains no event data.</param>
+    private void OnMarkersChanged(object sender, EventArgs e)
+    {
+        this.UpdateMarkers();
+    }
+
+    /// <summary>
+    /// Updates the collection of markers to reflect the current state of the application.
+    /// </summary>
+    /// ReSharper disable once AsyncVoidMethod
+    private async void UpdateMarkers()
+    {
+        var markers = await this.appState.GetMarkersAsync().ConfigureAwait(false);
+
+        this.Markers.Clear();
+
+        foreach (var marker in markers)
+        {
+            this.Markers.Add(marker.ToViewModel());
+        }
+    }
+
+    /// <summary>
+    /// Updates the title of the markers page to reflect the name of the current world.
+    /// </summary>
+    /// ReSharper disable once AsyncVoidMethod
+    private async void UpdateTitle()
+    {
+        var world = await this.appState.GetCurrentWorldAsync().ConfigureAwait(false);
+        this.Title = $"Markers - {world.Name}";
     }
 }

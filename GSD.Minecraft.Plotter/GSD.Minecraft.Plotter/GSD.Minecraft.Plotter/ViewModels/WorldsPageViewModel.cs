@@ -6,6 +6,7 @@ namespace GSD.Minecraft.Plotter.ViewModels;
 
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using GSD.Minecraft.Plotter.Services;
 using GSD.Minecraft.Plotter.Views;
 
 /// <summary>
@@ -25,8 +26,10 @@ public class WorldsPageViewModel : ViewModelBase
     public WorldsPageViewModel(AppState appState)
     {
         this.appState = appState ?? throw new ArgumentNullException(nameof(appState));
+        this.appState.WorldsChanged += this.OnWorldsChanged;
 
-        this.Worlds = appState.Worlds;
+        this.UpdateWorlds();
+
         this.CreateWorldCommand = new Command(this.CreateWorld);
         this.EditWorldCommand = new Command<WorldViewModel>(this.EditWorld);
     }
@@ -44,7 +47,7 @@ public class WorldsPageViewModel : ViewModelBase
     /// <summary>
     /// Gets the collection of worlds managed by this view model.
     /// </summary>
-    public ObservableCollection<WorldViewModel> Worlds { get; }
+    public ObservableCollection<WorldViewModel> Worlds { get; } = [];
 
     /// <summary>
     /// Creates a new world, initializes its properties, and navigates to the edit page for further customization.
@@ -74,5 +77,31 @@ public class WorldsPageViewModel : ViewModelBase
         var page = new EditWorldPage(pageViewModel);
 
         await Shell.Current.CurrentPage.Navigation.PushModalAsync(page).ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Occurs when the collection of worlds in the application state is modified.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">An <see cref="EventArgs" /> that contains no event data.</param>
+    private void OnWorldsChanged(object sender, EventArgs e)
+    {
+        this.UpdateWorlds();
+    }
+
+    /// <summary>
+    /// Updates the collection of worlds by synchronizing it with the current application state.
+    /// </summary>
+    /// ReSharper disable once AsyncVoidMethod
+    private async void UpdateWorlds()
+    {
+        var worlds = await this.appState.GetWorldsAsync().ConfigureAwait(false);
+
+        this.Worlds.Clear();
+
+        foreach (var world in worlds)
+        {
+            this.Worlds.Add(world.ToViewModel());
+        }
     }
 }

@@ -4,8 +4,8 @@
 
 namespace GSD.Minecraft.Plotter.ViewModels;
 
-using System.Collections.ObjectModel;
 using System.Windows.Input;
+using GSD.Minecraft.Plotter.Services;
 
 /// <summary>
 /// Represents the view model for the page in the application.
@@ -30,25 +30,12 @@ public class EditMarkerPageViewModel : ViewModelBase
         this.SaveCommand = new Command(this.Save);
         this.CancelCommand = new Command(Cancel);
         this.DeleteCommand = new Command(this.Delete);
-
-        this.Colors.Add(Microsoft.Maui.Graphics.Colors.White);
-        this.Colors.Add(Microsoft.Maui.Graphics.Colors.Red);
-        this.Colors.Add(Microsoft.Maui.Graphics.Colors.Orange);
-        this.Colors.Add(Microsoft.Maui.Graphics.Colors.Yellow);
-        this.Colors.Add(Microsoft.Maui.Graphics.Colors.Green);
-        this.Colors.Add(Microsoft.Maui.Graphics.Colors.Cyan);
-        this.Colors.Add(Microsoft.Maui.Graphics.Colors.Red);
     }
 
     /// <summary>
     /// Gets the command that cancels the current operation and navigates back to the previous page.
     /// </summary>
     public ICommand CancelCommand { get; }
-
-    /// <summary>
-    /// Gets the collection of available colors that can be selected for the marker.
-    /// </summary>
-    public ObservableCollection<Color> Colors { get; } = [];
 
     /// <summary>
     /// Gets the command that deletes the current marker.
@@ -87,7 +74,7 @@ public class EditMarkerPageViewModel : ViewModelBase
             return;
         }
 
-        this.appState.Markers.Remove(this.Marker);
+        await this.appState.DeleteMarkerAsync(this.Marker.Id).ConfigureAwait(false);
         await Shell.Current.CurrentPage.Navigation.PopModalAsync().ConfigureAwait(false);
     }
 
@@ -97,11 +84,7 @@ public class EditMarkerPageViewModel : ViewModelBase
     /// ReSharper disable once AsyncVoidMethod
     private async void Save()
     {
-        if (!this.appState.Markers.Contains(this.Marker))
-        {
-            this.appState.Markers.Add(this.Marker);
-        }
-
+        await this.appState.AddOrUpdateMarkerAsync(this.Marker.ToModel()).ConfigureAwait(false);
         await Shell.Current.CurrentPage.Navigation.PopModalAsync().ConfigureAwait(false);
     }
 }

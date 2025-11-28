@@ -5,6 +5,7 @@
 namespace GSD.Minecraft.Plotter.ViewModels;
 
 using System.Windows.Input;
+using GSD.Minecraft.Plotter.Services;
 
 /// <summary>
 /// Represents the view model for the page in the application.
@@ -66,12 +67,6 @@ public class EditWorldPageViewModel : ViewModelBase
     /// ReSharper disable once AsyncVoidMethod
     private async void Delete()
     {
-        if (this.appState.Worlds.Count == 1)
-        {
-            await Shell.Current.DisplayAlertAsync("Delete World", "Cannot delete the last world!", "OK").ConfigureAwait(true);
-            return;
-        }
-
         var confirmed = await Shell.Current.DisplayAlertAsync("Delete World", $"Delete {this.World.Name}?", "Delete", "Cancel").ConfigureAwait(true);
 
         if (!confirmed)
@@ -79,7 +74,7 @@ public class EditWorldPageViewModel : ViewModelBase
             return;
         }
 
-        this.appState.Worlds.Remove(this.World);
+        await this.appState.DeleteWorldAsync(this.World.Id).ConfigureAwait(false);
         await Shell.Current.CurrentPage.Navigation.PopModalAsync().ConfigureAwait(false);
     }
 
@@ -89,11 +84,7 @@ public class EditWorldPageViewModel : ViewModelBase
     /// ReSharper disable once AsyncVoidMethod
     private async void Save()
     {
-        if (!this.appState.Worlds.Contains(this.World))
-        {
-            this.appState.Worlds.Add(this.World);
-        }
-
+        await this.appState.AddOrUpdateWorldAsync(this.World.ToModel()).ConfigureAwait(false);
         await Shell.Current.CurrentPage.Navigation.PopModalAsync().ConfigureAwait(false);
     }
 }
