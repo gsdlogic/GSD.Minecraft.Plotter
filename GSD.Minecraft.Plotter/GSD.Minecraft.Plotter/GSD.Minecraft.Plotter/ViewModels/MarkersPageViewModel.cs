@@ -32,6 +32,7 @@ public class MarkersPageViewModel : ViewModelBase
         this.UpdateMarkers();
         this.UpdateTitle();
 
+        this.ImportCommand = new Command(this.ImportMarkers);
         this.AddMarkerCommand = new Command(this.AddMarker);
         this.EditMarkerCommand = new Command<MarkerViewModel>(this.EditMarker);
     }
@@ -45,6 +46,11 @@ public class MarkersPageViewModel : ViewModelBase
     /// Gets the command that allows editing an existing marker in the collection of markers.
     /// </summary>
     public ICommand EditMarkerCommand { get; }
+
+    /// <summary>
+    /// Gets the command that handles the import functionality for markers.
+    /// </summary>
+    public ICommand ImportCommand { get; }
 
     /// <summary>
     /// Gets the collection of markers associated with the current world.
@@ -88,6 +94,38 @@ public class MarkersPageViewModel : ViewModelBase
         var page = new EditMarkerPage(pageViewModel);
 
         await Shell.Current.CurrentPage.Navigation.PushModalAsync(page).ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Imports markers into the application by retrieving and processing marker data.
+    /// </summary>
+    /// ReSharper disable once AsyncVoidMethod
+    private async void ImportMarkers()
+    {
+        var options = new PickOptions
+        {
+            PickerTitle = "Select CSV file",
+            FileTypes = new FilePickerFileType(
+                new Dictionary<DevicePlatform, IEnumerable<string>>
+                {
+                    { DevicePlatform.WinUI, [".csv"] },
+                    { DevicePlatform.MacCatalyst, ["public.comma-separated-values-text"] },
+                    { DevicePlatform.iOS, ["public.comma-separated-values-text"] },
+                    { DevicePlatform.Android, ["text/csv"] },
+                }),
+        };
+
+        var result = await FilePicker.Default.PickAsync(options).ConfigureAwait(false);
+
+        if (result == null)
+        {
+            return;
+        }
+
+        var stream = await result.OpenReadAsync().ConfigureAwait(true);
+        await using var streamAsyncDisposable = stream.ConfigureAwait(false);
+
+        await this.appState.ImportMarkersAsync(stream).ConfigureAwait(false);
     }
 
     /// <summary>

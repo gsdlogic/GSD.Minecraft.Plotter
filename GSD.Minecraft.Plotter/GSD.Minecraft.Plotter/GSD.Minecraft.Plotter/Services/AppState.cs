@@ -284,6 +284,143 @@ public class AppState
     }
 
     /// <summary>
+    /// Imports markers into the application's state asynchronously from the provided stream.
+    /// </summary>
+    /// <param name="stream">The <see cref="Stream" /> containing marker data to be imported.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken" /> that can be used to cancel the asynchronous operation.</param>
+    /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
+    public async Task ImportMarkersAsync(Stream stream, CancellationToken cancellationToken = default)
+    {
+        var dbContext = await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+        var world = await this.GetCurrentWorldAsync(dbContext, cancellationToken).ConfigureAwait(false);
+
+        var rows = await ReadCsvAsync().ConfigureAwait(false);
+        var normalized = NormalizeRows();
+
+        foreach (var row in normalized)
+        {
+            var marker = new Marker
+            {
+                WorldId = world.Id,
+                Name = row[0],
+                X = float.Parse(row[1], CultureInfo.InvariantCulture),
+                Y = float.Parse(row[2], CultureInfo.InvariantCulture),
+                Z = float.Parse(row[3], CultureInfo.InvariantCulture),
+            };
+
+            dbContext.Markers.Add(marker);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        this.currentWorldMarkers = null;
+        this.OnMarkersChanged();
+
+        return;
+
+        async Task<string[][]> ReadCsvAsync()
+        {
+            using var streamReader = new StreamReader(stream);
+            var lines = new List<string[]>();
+
+            while (await streamReader.ReadLineAsync(cancellationToken).ConfigureAwait(false) is { } line)
+            {
+                var fields = CsvHelper.FromCsvString(line);
+                lines.Add(fields);
+            }
+
+            return lines.ToArray();
+        }
+
+        string[][] NormalizeRows()
+        {
+            if (rows.Length == 0)
+            {
+                return [];
+            }
+
+            int desc = -1, x = -1, y = -1, z = -1;
+
+            foreach (var col in Enumerable.Range(0, rows[0].Length))
+            {
+                bool anyNumeric = false, anyNonNumeric = false;
+                for (var i = 0; i < Math.Min(10, rows.Length); i++)
+                {
+                    if (col >= rows[i].Length)
+                    {
+                        continue;
+                    }
+
+                    if (double.TryParse(rows[i][col], NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+                    {
+                        anyNumeric = true;
+                    }
+                    else
+                    {
+                        anyNonNumeric = true;
+                    }
+
+                    if (anyNumeric && anyNonNumeric)
+                    {
+                        break;
+                    }
+                }
+
+                if (anyNumeric)
+                {
+                    if (x == -1)
+                    {
+                        x = col;
+                        continue;
+                    }
+
+                    if (y == -1)
+                    {
+                        y = col;
+                        continue;
+                    }
+
+                    if (z == -1)
+                    {
+                        z = col;
+                        continue;
+                    }
+                }
+
+                if (anyNonNumeric && (desc == -1))
+                {
+                    desc = col;
+                }
+            }
+
+            var results = new List<string[]>();
+
+            foreach (var row in rows)
+            {
+                if (row.All(string.IsNullOrWhiteSpace))
+                {
+                    continue;
+                }
+
+                if ((x < 0) || (y < 0) || !double.TryParse(row[x], NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+                {
+                    continue;
+                }
+
+                results.Add(
+                [
+                    desc >= 0 ? row[desc] : $"Marker {results.Count + 1}",
+                    row[x],
+                    row[y],
+                    z >= 0 ? row[z] : "0",
+                ]);
+            }
+
+            return results.ToArray();
+        }
+    }
+
+    /// <summary>
     /// Raises the <see cref="CurrentWorldChanged" /> event to notify subscribers that the current world has changed.
     /// </summary>
     protected virtual void OnCurrentWorldChanged()

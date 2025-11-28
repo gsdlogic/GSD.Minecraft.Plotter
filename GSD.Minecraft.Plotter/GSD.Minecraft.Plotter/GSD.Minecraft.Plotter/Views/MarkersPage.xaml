@@ -6,16 +6,19 @@
              x:DataType="viewModels:MarkersPageViewModel"
              Shell.NavBarIsVisible="True"
              Title="{Binding Title}">
+  <ContentPage.ToolbarItems>
+    <ToolbarItem Text="Import" Order="Secondary" Priority="0" Command="{Binding ImportCommand}" />
+  </ContentPage.ToolbarItems>
 
   <Grid RowDefinitions="Auto,Auto,*">
 
     <Button Grid.Row="0" Text="Add Marker" Command="{Binding AddMarkerCommand}" Margin="10" />
 
     <Grid Grid.Row="1" ColumnDefinitions="*,100,100,100" Padding="10" BackgroundColor="Transparent">
-      <Label Text="Name" Grid.Column="0" TextColor="White" FontAttributes="Bold" />
-      <Label Text="X" Grid.Column="1" TextColor="White" FontAttributes="Bold" HorizontalOptions="End" />
-      <Label Text="Y" Grid.Column="2" TextColor="White" FontAttributes="Bold" HorizontalOptions="End" />
-      <Label Text="Z" Grid.Column="3" TextColor="White" FontAttributes="Bold" HorizontalOptions="End" />
+      <Label Text="Name" Grid.Column="0" FontAttributes="Bold" />
+      <Label Text="X" Grid.Column="1" FontAttributes="Bold" HorizontalOptions="End" />
+      <Label Text="Y" Grid.Column="2" FontAttributes="Bold" HorizontalOptions="End" />
+      <Label Text="Z" Grid.Column="3" FontAttributes="Bold" HorizontalOptions="End" />
     </Grid>
 
     <CollectionView Grid.Row="2" ItemsSource="{Binding Markers}">
@@ -27,10 +30,10 @@
                 Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:MarkersPageViewModel}}, Path=EditMarkerCommand}"
                 CommandParameter="{Binding}" />
             </Grid.GestureRecognizers>
-            <Label Grid.Column="0" Text="{Binding Name}" TextColor="{Binding FillColor}" />
-            <Label Grid.Column="1" Text="{Binding X}" TextColor="White" HorizontalOptions="End" />
-            <Label Grid.Column="2" Text="{Binding Y}" TextColor="White" HorizontalOptions="End" />
-            <Label Grid.Column="3" Text="{Binding Z}" TextColor="White" HorizontalOptions="End" />
+            <Label Grid.Column="0" Text="{Binding Name}" />
+            <Label Grid.Column="1" Text="{Binding X}" HorizontalOptions="End" />
+            <Label Grid.Column="2" Text="{Binding Y}" HorizontalOptions="End" />
+            <Label Grid.Column="3" Text="{Binding Z}" HorizontalOptions="End" />
           </Grid>
         </DataTemplate>
       </CollectionView.ItemTemplate>
