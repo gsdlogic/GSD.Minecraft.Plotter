@@ -10,6 +10,21 @@ namespace GSD.Minecraft.Plotter.ViewModels;
 public interface IMapLayout
 {
     /// <summary>
+    /// Gets the color used to represent the origin grid lines on the map.
+    /// </summary>
+    Color OriginGridColor { get; }
+
+    /// <summary>
+    /// Gets the color used for the primary grid lines on the map.
+    /// </summary>
+    Color PrimaryGridColor { get; }
+
+    /// <summary>
+    /// Gets the color used for rendering the secondary grid lines on the map.
+    /// </summary>
+    Color SecondaryGridColor { get; }
+
+    /// <summary>
     /// Calculates the map coordinates corresponding to the specified marker.
     /// </summary>
     /// <param name="marker">The marker for which the map coordinates are to be calculated.</param>

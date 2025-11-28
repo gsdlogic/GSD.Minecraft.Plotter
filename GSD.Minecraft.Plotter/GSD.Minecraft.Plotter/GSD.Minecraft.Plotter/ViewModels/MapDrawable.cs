@@ -69,7 +69,7 @@ public class MapDrawable : ViewModelBase, IDrawable
 
         var camera = new Camera(dirtyRect, this.CenterX, this.CenterY, this.Zoom);
 
-        DrawGrid(canvas, camera);
+        this.DrawGrid(canvas, camera);
         this.DrawPoints(canvas, camera);
 
         canvas.RestoreState();
@@ -82,10 +82,14 @@ public class MapDrawable : ViewModelBase, IDrawable
     /// <param name="camera">
     /// The camera that provides the necessary transformations for converting  world coordinates into screen coordinates.
     /// </param>
-    private static void DrawGrid(ICanvas canvas, Camera camera)
+    private void DrawGrid(ICanvas canvas, Camera camera)
     {
         const float GridSpacing = 1;
         const float CellOffset = GridSpacing / 2f;
+
+        var originGridColor = this.Layout.OriginGridColor;
+        var primaryGidColor = this.Layout.PrimaryGridColor;
+        var secondaryGridColor = this.Layout.SecondaryGridColor;
 
         var worldMinX = camera.ScreenToWorldX(camera.ViewPort.Left);
         var worldMaxX = camera.ScreenToWorldX(camera.ViewPort.Left + camera.ViewPort.Width);
@@ -102,11 +106,12 @@ public class MapDrawable : ViewModelBase, IDrawable
         {
             var sx = camera.WorldToScreenX(x - CellOffset);
             var isChunkLine = MathF.Floor(x) % 16 == 0;
+            var isOrigin = MathF.Floor(x) == 0;
 
             if (isChunkLine || (camera.Zoom > 10.0))
             {
                 canvas.StrokeSize = 1;
-                canvas.StrokeColor = isChunkLine ? Colors.LightGray : Colors.Gray;
+                canvas.StrokeColor = isOrigin ? originGridColor : isChunkLine ? primaryGidColor : secondaryGridColor;
                 canvas.DrawLine(sx, camera.ViewPort.Top, sx, camera.ViewPort.Top + camera.ViewPort.Height);
             }
 
@@ -122,11 +127,12 @@ public class MapDrawable : ViewModelBase, IDrawable
         {
             var sy = camera.WorldToScreenY(y - CellOffset);
             var isChunkLine = MathF.Floor(y) % 16 == 0;
+            var isOrigin = MathF.Floor(y) == 0;
 
             if (isChunkLine || (camera.Zoom > 10.0))
             {
                 canvas.StrokeSize = 1;
-                canvas.StrokeColor = isChunkLine ? Colors.LightGray : Colors.Gray;
+                canvas.StrokeColor = isOrigin ? originGridColor : isChunkLine ? primaryGidColor : secondaryGridColor;
                 canvas.DrawLine(camera.ViewPort.Left, sy, camera.ViewPort.Left + camera.ViewPort.Width, sy);
             }
 

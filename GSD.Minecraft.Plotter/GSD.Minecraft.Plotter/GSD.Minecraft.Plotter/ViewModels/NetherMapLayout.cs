@@ -10,6 +10,21 @@ namespace GSD.Minecraft.Plotter.ViewModels;
 public class NetherMapLayout : IMapLayout
 {
     /// <summary>
+    /// Gets the color used to represent the origin grid lines on the map.
+    /// </summary>
+    public Color OriginGridColor => Color.FromArgb("#FFFF0000");
+
+    /// <summary>
+    /// Gets the color used for the primary grid lines on the map.
+    /// </summary>
+    public Color PrimaryGridColor => Color.FromArgb("#FFAA6666");
+
+    /// <summary>
+    /// Gets the color used for rendering the secondary grid lines on the map.
+    /// </summary>
+    public Color SecondaryGridColor => Color.FromArgb("#FF993333");
+
+    /// <summary>
     /// Calculates the map coordinates corresponding to the specified marker.
     /// </summary>
     /// <param name="marker">The marker for which the map coordinates are to be calculated.</param>
