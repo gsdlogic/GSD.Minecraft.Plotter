@@ -166,7 +166,8 @@ public class MapDrawable : ViewModelBase, IDrawable
 
             canvas.FontColor = Colors.White;
             canvas.FontSize = 14;
-            canvas.DrawString($"{floorX},{floorY}", screenX + 12, screenY - 8, HorizontalAlignment.Left);
+            canvas.DrawString($"{marker.Name}", screenX + 12, screenY - 8, HorizontalAlignment.Left);
+            canvas.DrawString($"{floorX},{floorY}", screenX + 12, screenY + 8, HorizontalAlignment.Left);
         }
     }
 
