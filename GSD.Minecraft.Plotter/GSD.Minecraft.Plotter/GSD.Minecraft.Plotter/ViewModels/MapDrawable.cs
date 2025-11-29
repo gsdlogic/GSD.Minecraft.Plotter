@@ -16,7 +16,7 @@ public class MapDrawable : ViewModelBase, IDrawable
     /// </summary>
     public MapDrawable()
     {
-        this.Zoom = 30.0f;
+        this.Zoom = 1.0f;
     }
 
     /// <summary>
@@ -84,7 +84,7 @@ public class MapDrawable : ViewModelBase, IDrawable
     /// </param>
     private void DrawGrid(ICanvas canvas, Camera camera)
     {
-        const float GridSpacing = 1;
+        const float GridSpacing = 1.0f;
         const float CellOffset = GridSpacing / 2f;
 
         var originGridColor = this.Layout.OriginGridColor;
@@ -96,51 +96,65 @@ public class MapDrawable : ViewModelBase, IDrawable
         var worldMinY = camera.ScreenToWorldY(camera.ViewPort.Top);
         var worldMaxY = camera.ScreenToWorldY(camera.ViewPort.Top + camera.ViewPort.Height);
 
-        var startX = (int)MathF.Floor(worldMinX / GridSpacing) * GridSpacing;
-        var endX = (int)MathF.Ceiling(worldMaxX / GridSpacing) * GridSpacing;
+        var startX = MathF.Floor(worldMinX);
+        var startY = MathF.Floor(worldMinY);
+        var endX = MathF.Ceiling(worldMaxX);
+        var endY = MathF.Ceiling(worldMaxY);
 
-        var startY = (int)MathF.Floor(worldMinY / GridSpacing) * GridSpacing;
-        var endY = (int)MathF.Ceiling(worldMaxY / GridSpacing) * GridSpacing;
+        var unitPx = camera.WorldToScreenX(1) - camera.WorldToScreenX(0);
+
+        // pick a grid spacing so lines are at least ~16 px apart
+        var gridSpacing = 1;
+
+        while (unitPx * gridSpacing < 16)
+        {
+            gridSpacing *= 2;
+        }
+
+        // pick label spacing (so labels don’t overlap)
+        var labelSpacing = gridSpacing * 2;
 
         for (var x = startX; x <= endX; x += GridSpacing)
         {
             var sx = camera.WorldToScreenX(x - CellOffset);
-            var isChunkLine = MathF.Floor(x) % 16 == 0;
-            var isOrigin = MathF.Floor(x) == 0;
+            var floor = MathF.Floor(x);
+            var isOrigin = floor == 0;
+            var isChunkLine = floor % 16 == 0;
 
-            if (isChunkLine || (camera.Zoom > 10.0))
+            if (floor % gridSpacing == 0)
             {
                 canvas.StrokeSize = 1;
                 canvas.StrokeColor = isOrigin ? originGridColor : isChunkLine ? primaryGidColor : secondaryGridColor;
                 canvas.DrawLine(sx, camera.ViewPort.Top, sx, camera.ViewPort.Top + camera.ViewPort.Height);
             }
 
-            if (isChunkLine)
+            if (floor % labelSpacing == 0)
             {
                 canvas.FontSize = 14;
                 canvas.FontColor = Colors.White;
-                canvas.DrawString($"{MathF.Floor(x)}", sx, camera.ViewPort.Top + 20, HorizontalAlignment.Center);
+                canvas.DrawString($"{floor}", sx, camera.ViewPort.Top + 20, HorizontalAlignment.Center);
             }
         }
 
         for (var y = startY; y <= endY; y += GridSpacing)
         {
             var sy = camera.WorldToScreenY(y - CellOffset);
-            var isChunkLine = MathF.Floor(y) % 16 == 0;
-            var isOrigin = MathF.Floor(y) == 0;
+            var floor = MathF.Floor(y);
+            var isOrigin = floor == 0;
+            var isChunkLine = floor % 16 == 0;
 
-            if (isChunkLine || (camera.Zoom > 10.0))
+            if (floor % gridSpacing == 0)
             {
                 canvas.StrokeSize = 1;
                 canvas.StrokeColor = isOrigin ? originGridColor : isChunkLine ? primaryGidColor : secondaryGridColor;
                 canvas.DrawLine(camera.ViewPort.Left, sy, camera.ViewPort.Left + camera.ViewPort.Width, sy);
             }
 
-            if (isChunkLine)
+            if (floor % labelSpacing == 0)
             {
                 canvas.FontSize = 14;
                 canvas.FontColor = Colors.White;
-                canvas.DrawString($"{MathF.Floor(y)}", camera.ViewPort.Left + 20, sy, HorizontalAlignment.Center);
+                canvas.DrawString($"{floor}", camera.ViewPort.Left + 20, sy, HorizontalAlignment.Center);
             }
         }
     }
@@ -166,8 +180,8 @@ public class MapDrawable : ViewModelBase, IDrawable
 
             canvas.FontColor = Colors.White;
             canvas.FontSize = 14;
-            canvas.DrawString($"{marker.Name}", screenX + 12, screenY - 8, HorizontalAlignment.Left);
-            canvas.DrawString($"{floorX},{floorY}", screenX + 12, screenY + 8, HorizontalAlignment.Left);
+            canvas.DrawString($"{marker.Name}", screenX + 15, screenY - 8, HorizontalAlignment.Left);
+            canvas.DrawString($"{floorX},{floorY}", screenX + 15, screenY + 8, HorizontalAlignment.Left);
         }
     }
 

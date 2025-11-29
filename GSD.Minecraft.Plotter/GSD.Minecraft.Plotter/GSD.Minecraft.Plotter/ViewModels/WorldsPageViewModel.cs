@@ -26,12 +26,14 @@ public class WorldsPageViewModel : ViewModelBase
     public WorldsPageViewModel(AppState appState)
     {
         this.appState = appState ?? throw new ArgumentNullException(nameof(appState));
+        this.appState.CurrentWorldChanged += this.OnCurrentWorldChanged;
         this.appState.WorldsChanged += this.OnWorldsChanged;
-
-        this.UpdateWorlds();
 
         this.CreateWorldCommand = new Command(this.CreateWorld);
         this.EditWorldCommand = new Command<WorldViewModel>(this.EditWorld);
+
+        this.UpdateWorlds();
+        this.UpdateTitle();
     }
 
     /// <summary>
@@ -43,6 +45,15 @@ public class WorldsPageViewModel : ViewModelBase
     /// Gets the command that allows editing an existing marker in the collection of markers.
     /// </summary>
     public ICommand EditWorldCommand { get; }
+
+    /// <summary>
+    /// Gets or sets the title of the map page, which dynamically reflects the name of the current world.
+    /// </summary>
+    public string Title
+    {
+        get => this.GetValue<string>();
+        set => this.SetValue(value);
+    }
 
     /// <summary>
     /// Gets the collection of worlds managed by this view model.
@@ -80,6 +91,16 @@ public class WorldsPageViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Occurs when the current world in the application state changes.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">An <see cref="EventArgs" /> containing no event data.</param>
+    private void OnCurrentWorldChanged(object sender, EventArgs e)
+    {
+        this.UpdateTitle();
+    }
+
+    /// <summary>
     /// Occurs when the collection of worlds in the application state is modified.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
@@ -87,6 +108,16 @@ public class WorldsPageViewModel : ViewModelBase
     private void OnWorldsChanged(object sender, EventArgs e)
     {
         this.UpdateWorlds();
+    }
+
+    /// <summary>
+    /// Updates the title of the map page to reflect the name of the current world.
+    /// </summary>
+    /// ReSharper disable once AsyncVoidMethod
+    private async void UpdateTitle()
+    {
+        var world = await this.appState.GetCurrentWorldAsync().ConfigureAwait(true);
+        this.Title = world.Name;
     }
 
     /// <summary>

@@ -4,7 +4,8 @@
              xmlns:viewModels="clr-namespace:GSD.Minecraft.Plotter.ViewModels"
              x:Class="GSD.Minecraft.Plotter.Views.WorldsPage"
              x:DataType="viewModels:WorldsPageViewModel"
-             Shell.NavBarIsVisible="True">
+             Shell.NavBarIsVisible="True"
+             Title="{Binding Title}">
 
   <Grid RowDefinitions="Auto,Auto,*">
 

@@ -171,6 +171,6 @@ public class MarkersPageViewModel : ViewModelBase
     private async void UpdateTitle()
     {
         var world = await this.appState.GetCurrentWorldAsync().ConfigureAwait(false);
-        this.Title = $"Markers - {world.Name}";
+        this.Title = world.Name;
     }
 }

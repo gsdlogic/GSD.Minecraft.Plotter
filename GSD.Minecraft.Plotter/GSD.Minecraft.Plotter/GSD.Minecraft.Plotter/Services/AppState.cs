@@ -79,9 +79,9 @@ public class AppState
         ArgumentNullException.ThrowIfNull(marker);
 
         var dbContext = await this.EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+        var world = await this.GetCurrentWorldAsync(dbContext, cancellationToken).ConfigureAwait(false);
 
-        marker.World = await this.GetCurrentWorldAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        marker.WorldId = marker.World.Id;
+        marker.WorldId = world.Id;
 
         var existingMarker = await dbContext.Markers.FindAsync([marker.Id], cancellationToken).ConfigureAwait(false);
 

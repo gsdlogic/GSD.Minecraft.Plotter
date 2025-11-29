@@ -111,6 +111,6 @@ public class MapPageViewModel : ViewModelBase
     private async void UpdateTitle()
     {
         var world = await this.appState.GetCurrentWorldAsync().ConfigureAwait(true);
-        this.Title = $"Map - {world.Name}";
+        this.Title = world.Name;
     }
 }
