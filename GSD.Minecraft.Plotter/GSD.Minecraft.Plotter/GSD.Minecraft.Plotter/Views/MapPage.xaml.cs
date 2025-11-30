@@ -44,6 +44,21 @@ public partial class MapPage
     }
 
     /// <summary>
+    /// Handles the <see cref="GraphicsView.SizeChanged" /> event to update the viewport dimensions
+    /// in the associated <see cref="MapPageViewModel" />.
+    /// </summary>
+    /// <param name="sender">The source of the event, typically the <see cref="GraphicsView" />.</param>
+    /// <param name="e">The event data associated with the size change.</param>
+    private void OnGraphicsViewSizeChanged(object sender, EventArgs e)
+    {
+        if (this.BindingContext is MapPageViewModel viewModel)
+        {
+            viewModel.ViewWidth = (float)this.GraphicsView.Width;
+            viewModel.ViewHeight = (float)this.GraphicsView.Height;
+        }
+    }
+
+    /// <summary>
     /// Handles the <see cref="MapPageViewModel.InvalidateRequested" /> event to trigger a redraw of the map view.
     /// </summary>
     /// <param name="sender">The source of the event, typically the <see cref="MapPageViewModel" />.</param>
@@ -98,8 +113,6 @@ public partial class MapPage
         viewModel.ZoomAndScale(
             (float)e.Scale,
             (float)(e.ScaleOrigin.X * this.GraphicsView.Width),
-            (float)(e.ScaleOrigin.Y * this.GraphicsView.Height),
-            (float)this.GraphicsView.Width,
-            (float)this.GraphicsView.Height);
+            (float)(e.ScaleOrigin.Y * this.GraphicsView.Height));
     }
 }

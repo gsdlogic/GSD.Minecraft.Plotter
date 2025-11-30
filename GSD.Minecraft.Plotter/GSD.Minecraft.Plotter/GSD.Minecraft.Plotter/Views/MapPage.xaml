@@ -14,7 +14,7 @@
 
   <Grid RowDefinitions="*,Auto">
 
-    <GraphicsView Grid.Row="0" x:Name="GraphicsView" Drawable="{Binding Drawable}">
+    <GraphicsView Grid.Row="0" x:Name="GraphicsView" Drawable="{Binding Drawable}" SizeChanged="OnGraphicsViewSizeChanged">
       <GraphicsView.GestureRecognizers>
         <PanGestureRecognizer PanUpdated="OnPanUpdated" />
         <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />

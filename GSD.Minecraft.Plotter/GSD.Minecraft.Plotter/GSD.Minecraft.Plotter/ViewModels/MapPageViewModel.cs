@@ -45,7 +45,7 @@ public class MapPageViewModel : ViewModelBase
     public event EventHandler InvalidateRequested;
 
     /// <summary>
-    /// Gets or sets the X-component for the center of the map.
+    /// Gets or sets the X-component for the center of the map relative to the view.
     /// </summary>
     public float CenterX
     {
@@ -54,7 +54,7 @@ public class MapPageViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets or sets the Y-component for the center of the map.
+    /// Gets or sets the Y-component for the center of the map relative to the view.
     /// </summary>
     public float CenterY
     {
@@ -105,6 +105,16 @@ public class MapPageViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Gets or sets the height of the viewport used for rendering the map.
+    /// </summary>
+    public float ViewHeight { get; set; }
+
+    /// <summary>
+    /// Gets or sets the width of the viewport used for rendering the map.
+    /// </summary>
+    public float ViewWidth { get; set; }
+
+    /// <summary>
     /// Gets or sets the zoom level.
     /// </summary>
     public float Zoom
@@ -132,17 +142,16 @@ public class MapPageViewModel : ViewModelBase
     /// <param name="scale">The zoom scale factor to apply.</param>
     /// <param name="originX">The X-coordinate of the zoom origin in the view.</param>
     /// <param name="originY">The Y-coordinate of the zoom origin in the view.</param>
-    /// <param name="viewWidth">The width of the view in which the zoom operation is performed.</param>
-    /// <param name="viewHeight">The height of the view in which the zoom operation is performed.</param>
-    public void ZoomAndScale(float scale, float originX, float originY, float viewWidth, float viewHeight)
+    public void ZoomAndScale(float scale, float originX, float originY)
     {
-        var worldX = (originX - (viewWidth / 2f) - this.CenterX) / this.Zoom;
-        var worldY = (originY - (viewHeight / 2f) - this.CenterY) / this.Zoom;
+        var worldX = (originX - (this.ViewWidth / 2f) - this.CenterX) / this.Zoom;
+        var worldY = (originY - (this.ViewHeight / 2f) - this.CenterY) / this.Zoom;
 
         this.Zoom *= scale;
+        this.Zoom = Math.Min(Math.Max(this.Zoom, 0.001f), 50.0f);
 
-        this.CenterX = originX - (worldX * this.Zoom) - (viewWidth / 2f);
-        this.CenterY = originY - (worldY * this.Zoom) - (viewHeight / 2f);
+        this.CenterX = originX - (worldX * this.Zoom) - (this.ViewWidth / 2f);
+        this.CenterY = originY - (worldY * this.Zoom) - (this.ViewHeight / 2f);
 
         this.OnInvalidateRequested();
     }

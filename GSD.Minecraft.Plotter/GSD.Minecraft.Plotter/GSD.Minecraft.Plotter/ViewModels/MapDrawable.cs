@@ -66,22 +66,19 @@ public class MapDrawable : ViewModelBase, IDrawable
 
         var worldMinX = camera.ScreenToWorldX(camera.ViewPort.Left);
         var worldMaxX = camera.ScreenToWorldX(camera.ViewPort.Left + camera.ViewPort.Width);
-        var startX = MathF.Floor(worldMinX);
+        var startX = MathF.Floor(worldMinX / gridSpacing) * gridSpacing;
         var endX = MathF.Ceiling(worldMaxX);
 
-        for (var x = startX; x <= endX; x += 1.0f)
+        for (var x = startX; x <= endX; x += gridSpacing)
         {
             var sx = camera.WorldToScreenX(x - 0.5f);
             var floor = MathF.Floor(x);
             var isOrigin = floor == 0;
             var isChunkLine = floor % 16 == 0;
 
-            if (floor % gridSpacing == 0)
-            {
-                canvas.StrokeSize = 1;
-                canvas.StrokeColor = isOrigin ? originGridColor : isChunkLine ? primaryGidColor : secondaryGridColor;
-                canvas.DrawLine(sx, camera.ViewPort.Top, sx, camera.ViewPort.Top + camera.ViewPort.Height);
-            }
+            canvas.StrokeSize = 1;
+            canvas.StrokeColor = isOrigin ? originGridColor : isChunkLine ? primaryGidColor : secondaryGridColor;
+            canvas.DrawLine(sx, camera.ViewPort.Top, sx, camera.ViewPort.Top + camera.ViewPort.Height);
 
             if (floor % labelSpacing == 0)
             {
@@ -93,22 +90,19 @@ public class MapDrawable : ViewModelBase, IDrawable
 
         var worldMinY = camera.ScreenToWorldY(camera.ViewPort.Top);
         var worldMaxY = camera.ScreenToWorldY(camera.ViewPort.Top + camera.ViewPort.Height);
-        var startY = MathF.Floor(worldMinY);
+        var startY = MathF.Floor(worldMinY / gridSpacing) * gridSpacing;
         var endY = MathF.Ceiling(worldMaxY);
 
-        for (var y = startY; y <= endY; y += 1.0f)
+        for (var y = startY; y <= endY; y += gridSpacing)
         {
             var sy = camera.WorldToScreenY(y - 0.5f);
             var floor = MathF.Floor(y);
             var isOrigin = floor == 0;
             var isChunkLine = floor % 16 == 0;
 
-            if (floor % gridSpacing == 0)
-            {
-                canvas.StrokeSize = 1;
-                canvas.StrokeColor = isOrigin ? originGridColor : isChunkLine ? primaryGidColor : secondaryGridColor;
-                canvas.DrawLine(camera.ViewPort.Left, sy, camera.ViewPort.Left + camera.ViewPort.Width, sy);
-            }
+            canvas.StrokeSize = 1;
+            canvas.StrokeColor = isOrigin ? originGridColor : isChunkLine ? primaryGidColor : secondaryGridColor;
+            canvas.DrawLine(camera.ViewPort.Left, sy, camera.ViewPort.Left + camera.ViewPort.Width, sy);
 
             if (floor % labelSpacing == 0)
             {
