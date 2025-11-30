@@ -19,6 +19,11 @@ public class MapPageViewModel : ViewModelBase
     private readonly AppState appState;
 
     /// <summary>
+    /// Indicates whether a new world has been loaded or initialized.
+    /// </summary>
+    private bool newWorld;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="MapPageViewModel" /> class.
     /// </summary>
     /// <param name="appState">The current application state used to synchronize the map's drawable elements.</param>
@@ -249,6 +254,7 @@ public class MapPageViewModel : ViewModelBase
     private void OnCurrentWorldChanged(object sender, EventArgs e)
     {
         this.UpdateTitle();
+        this.newWorld = true;
     }
 
     /// <summary>
@@ -259,6 +265,12 @@ public class MapPageViewModel : ViewModelBase
     private void OnMarkersChanged(object sender, EventArgs e)
     {
         this.UpdateMarkers();
+
+        if (this.newWorld)
+        {
+            this.ZoomToExtents();
+            this.newWorld = false;
+        }
     }
 
     /// <summary>
