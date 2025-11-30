@@ -4,56 +4,23 @@
 
 namespace GSD.Minecraft.Plotter.ViewModels;
 
-using System.Collections.ObjectModel;
-
 /// <summary>
 /// Represents a drawable map with zoom and center point properties,  supporting the addition of markers and rendering capabilities.
 /// </summary>
 public class MapDrawable : ViewModelBase, IDrawable
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="MapDrawable" /> class.
+    /// The <see cref="MapPageViewModel" /> instance that provides data and commands for the map.
     /// </summary>
-    public MapDrawable()
+    private readonly MapPageViewModel viewModel;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MapDrawable" /> class with the specified view model.
+    /// </summary>
+    /// <param name="viewModel">The <see cref="MapPageViewModel" /> instance that provides data and commands for the map.</param>
+    public MapDrawable(MapPageViewModel viewModel)
     {
-        this.Zoom = 1.0f;
-    }
-
-    /// <summary>
-    /// Gets or sets the X-component for the center of the map.
-    /// </summary>
-    public float CenterX
-    {
-        get => this.GetValue<float>();
-        set => this.SetValue(value);
-    }
-
-    /// <summary>
-    /// Gets or sets the Y-component for the center of the map.
-    /// </summary>
-    public float CenterY
-    {
-        get => this.GetValue<float>();
-        set => this.SetValue(value);
-    }
-
-    /// <summary>
-    /// Gets or sets the map layout.
-    /// </summary>
-    public IMapLayout Layout { get; set; }
-
-    /// <summary>
-    /// Gets the collection of markers.
-    /// </summary>
-    public Collection<MarkerViewModel> Markers { get; } = [];
-
-    /// <summary>
-    /// Gets or sets the zoom level.
-    /// </summary>
-    public float Zoom
-    {
-        get => this.GetValue<float>();
-        set => this.SetValue(value);
+        this.viewModel = viewModel;
     }
 
     /// <summary>
@@ -67,7 +34,7 @@ public class MapDrawable : ViewModelBase, IDrawable
 
         canvas.SaveState();
 
-        var camera = new Camera(dirtyRect, this.CenterX, this.CenterY, this.Zoom);
+        var camera = new Camera(dirtyRect, this.viewModel.CenterX, this.viewModel.CenterY, this.viewModel.Zoom);
 
         this.DrawGrid(canvas, camera);
         this.DrawPoints(canvas, camera);
@@ -84,39 +51,27 @@ public class MapDrawable : ViewModelBase, IDrawable
     /// </param>
     private void DrawGrid(ICanvas canvas, Camera camera)
     {
-        const float GridSpacing = 1.0f;
-        const float CellOffset = GridSpacing / 2f;
+        var originGridColor = this.viewModel.Layout.OriginGridColor;
+        var primaryGidColor = this.viewModel.Layout.PrimaryGridColor;
+        var secondaryGridColor = this.viewModel.Layout.SecondaryGridColor;
 
-        var originGridColor = this.Layout.OriginGridColor;
-        var primaryGidColor = this.Layout.PrimaryGridColor;
-        var secondaryGridColor = this.Layout.SecondaryGridColor;
-
-        var worldMinX = camera.ScreenToWorldX(camera.ViewPort.Left);
-        var worldMaxX = camera.ScreenToWorldX(camera.ViewPort.Left + camera.ViewPort.Width);
-        var worldMinY = camera.ScreenToWorldY(camera.ViewPort.Top);
-        var worldMaxY = camera.ScreenToWorldY(camera.ViewPort.Top + camera.ViewPort.Height);
-
-        var startX = MathF.Floor(worldMinX);
-        var startY = MathF.Floor(worldMinY);
-        var endX = MathF.Ceiling(worldMaxX);
-        var endY = MathF.Ceiling(worldMaxY);
-
-        var unitPx = camera.WorldToScreenX(1) - camera.WorldToScreenX(0);
-
-        // pick a grid spacing so lines are at least ~16 px apart
         var gridSpacing = 1;
 
-        while (unitPx * gridSpacing < 16)
+        while (this.viewModel.Zoom * gridSpacing < 16)
         {
             gridSpacing *= 2;
         }
 
-        // pick label spacing (so labels don’t overlap)
         var labelSpacing = gridSpacing * 2;
 
-        for (var x = startX; x <= endX; x += GridSpacing)
+        var worldMinX = camera.ScreenToWorldX(camera.ViewPort.Left);
+        var worldMaxX = camera.ScreenToWorldX(camera.ViewPort.Left + camera.ViewPort.Width);
+        var startX = MathF.Floor(worldMinX);
+        var endX = MathF.Ceiling(worldMaxX);
+
+        for (var x = startX; x <= endX; x += 1.0f)
         {
-            var sx = camera.WorldToScreenX(x - CellOffset);
+            var sx = camera.WorldToScreenX(x - 0.5f);
             var floor = MathF.Floor(x);
             var isOrigin = floor == 0;
             var isChunkLine = floor % 16 == 0;
@@ -136,9 +91,14 @@ public class MapDrawable : ViewModelBase, IDrawable
             }
         }
 
-        for (var y = startY; y <= endY; y += GridSpacing)
+        var worldMinY = camera.ScreenToWorldY(camera.ViewPort.Top);
+        var worldMaxY = camera.ScreenToWorldY(camera.ViewPort.Top + camera.ViewPort.Height);
+        var startY = MathF.Floor(worldMinY);
+        var endY = MathF.Ceiling(worldMaxY);
+
+        for (var y = startY; y <= endY; y += 1.0f)
         {
-            var sy = camera.WorldToScreenY(y - CellOffset);
+            var sy = camera.WorldToScreenY(y - 0.5f);
             var floor = MathF.Floor(y);
             var isOrigin = floor == 0;
             var isChunkLine = floor % 16 == 0;
@@ -166,9 +126,9 @@ public class MapDrawable : ViewModelBase, IDrawable
     /// <param name="camera">The camera that provides the transformation from world coordinates to screen coordinates.</param>
     private void DrawPoints(ICanvas canvas, Camera camera)
     {
-        foreach (var marker in this.Markers)
+        foreach (var marker in this.viewModel.Markers)
         {
-            var point = this.Layout?.GetMapCoordinate(marker) ?? (marker.X, marker.Y);
+            var point = this.viewModel.Layout?.GetMapCoordinate(marker) ?? (marker.X, marker.Y);
             var floorX = (float)Math.Floor(point.X);
             var floorY = (float)Math.Floor(point.Y);
 

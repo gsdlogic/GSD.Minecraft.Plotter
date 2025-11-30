@@ -17,7 +17,7 @@ public class WindowsZoomHandler : IPlatformZoomHandler
     /// </summary>
     /// <param name="view">The <see cref="GraphicsView" /> to which the zoom handler will be attached.</param>
     /// <param name="zoomCallback">A callback function that is invoked with the zoom factor when a zoom action occurs.</param>
-    public void AttachTo(GraphicsView view, Action<float, float, float> zoomCallback)
+    public void AttachTo(GraphicsView view, Action<float, float, float, float, float> zoomCallback)
     {
         ArgumentNullException.ThrowIfNull(view);
 
@@ -29,7 +29,13 @@ public class WindowsZoomHandler : IPlatformZoomHandler
                 {
                     var point = e.GetCurrentPoint((UIElement)s);
                     var factor = point.Properties.MouseWheelDelta > 0 ? 1.1f : 0.9f;
-                    zoomCallback(factor, (float)point.Position.X, (float)point.Position.Y);
+
+                    zoomCallback(
+                        factor,
+                        (float)point.Position.X,
+                        (float)point.Position.Y,
+                        (float)view.Width,
+                        (float)view.Height);
                 };
             }
         };

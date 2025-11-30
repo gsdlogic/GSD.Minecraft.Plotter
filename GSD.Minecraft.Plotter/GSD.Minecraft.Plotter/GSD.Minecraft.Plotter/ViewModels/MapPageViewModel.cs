@@ -4,6 +4,7 @@
 
 namespace GSD.Minecraft.Plotter.ViewModels;
 
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using GSD.Minecraft.Plotter.Services;
 
@@ -27,27 +28,62 @@ public class MapPageViewModel : ViewModelBase
         this.appState.CurrentWorldChanged += this.OnCurrentWorldChanged;
         this.appState.MarkersChanged += this.OnMarkersChanged;
 
-        this.OverworldCommand = new Command(() => this.MapLayout = new OverworldMapLayout());
-        this.NetherCommand = new Command(() => this.MapLayout = new NetherMapLayout());
-        this.MapLayout = new OverworldMapLayout();
+        this.OverworldCommand = new Command(() => this.Layout = new OverworldMapLayout());
+        this.NetherCommand = new Command(() => this.Layout = new NetherMapLayout());
+
+        this.Zoom = 1.0f;
+        this.Layout = new OverworldMapLayout();
+        this.Drawable = new MapDrawable(this);
 
         this.UpdateMarkers();
         this.UpdateTitle();
     }
 
     /// <summary>
+    /// Occurs when the map view requires invalidation.
+    /// </summary>
+    public event EventHandler InvalidateRequested;
+
+    /// <summary>
+    /// Gets or sets the X-component for the center of the map.
+    /// </summary>
+    public float CenterX
+    {
+        get => this.GetValue<float>();
+        set => this.SetValue(value);
+    }
+
+    /// <summary>
+    /// Gets or sets the Y-component for the center of the map.
+    /// </summary>
+    public float CenterY
+    {
+        get => this.GetValue<float>();
+        set => this.SetValue(value);
+    }
+
+    /// <summary>
     /// Gets the map drawable.
     /// </summary>
-    public MapDrawable MapDrawable { get; } = new();
+    public MapDrawable Drawable { get; }
 
     /// <summary>
     /// Gets or sets the current map layout used for plotting markers on the map.
     /// </summary>
-    public IMapLayout MapLayout
+    public IMapLayout Layout
     {
         get => this.GetValue<IMapLayout>();
-        set => this.SetValue(value);
+        set
+        {
+            this.SetValue(value);
+            this.OnInvalidateRequested();
+        }
     }
+
+    /// <summary>
+    /// Gets the collection of markers.
+    /// </summary>
+    public ObservableCollection<MarkerViewModel> Markers { get; } = [];
 
     /// <summary>
     /// Gets the command to set the layout relative to the Nether map.
@@ -66,6 +102,57 @@ public class MapPageViewModel : ViewModelBase
     {
         get => this.GetValue<string>();
         set => this.SetValue(value);
+    }
+
+    /// <summary>
+    /// Gets or sets the zoom level.
+    /// </summary>
+    public float Zoom
+    {
+        get => this.GetValue<float>();
+        set => this.SetValue(value);
+    }
+
+    /// <summary>
+    /// Centers the map at the specified coordinates.
+    /// </summary>
+    /// <param name="x">The X-coordinate to center the map on.</param>
+    /// <param name="y">The Y-coordinate to center the map on.</param>
+    public void CenterMap(float x, float y)
+    {
+        this.CenterX = x;
+        this.CenterY = y;
+
+        this.OnInvalidateRequested();
+    }
+
+    /// <summary>
+    /// Adjusts the zoom level and repositions the map's center based on the specified scale, origin, and view dimensions.
+    /// </summary>
+    /// <param name="scale">The zoom scale factor to apply.</param>
+    /// <param name="originX">The X-coordinate of the zoom origin in the view.</param>
+    /// <param name="originY">The Y-coordinate of the zoom origin in the view.</param>
+    /// <param name="viewWidth">The width of the view in which the zoom operation is performed.</param>
+    /// <param name="viewHeight">The height of the view in which the zoom operation is performed.</param>
+    public void ZoomAndScale(float scale, float originX, float originY, float viewWidth, float viewHeight)
+    {
+        var worldX = (originX - (viewWidth / 2f) - this.CenterX) / this.Zoom;
+        var worldY = (originY - (viewHeight / 2f) - this.CenterY) / this.Zoom;
+
+        this.Zoom *= scale;
+
+        this.CenterX = originX - (worldX * this.Zoom) - (viewWidth / 2f);
+        this.CenterY = originY - (worldY * this.Zoom) - (viewHeight / 2f);
+
+        this.OnInvalidateRequested();
+    }
+
+    /// <summary>
+    /// Raises the <see cref="InvalidateRequested" /> event to notify subscribers that the map view requires redrawing.
+    /// </summary>
+    protected virtual void OnInvalidateRequested()
+    {
+        this.InvalidateRequested?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -96,11 +183,11 @@ public class MapPageViewModel : ViewModelBase
     {
         var markers = await this.appState.GetMarkersAsync().ConfigureAwait(false);
 
-        this.MapDrawable.Markers.Clear();
+        this.Markers.Clear();
 
         foreach (var marker in markers)
         {
-            this.MapDrawable.Markers.Add(marker.ToViewModel());
+            this.Markers.Add(marker.ToViewModel());
         }
     }
 

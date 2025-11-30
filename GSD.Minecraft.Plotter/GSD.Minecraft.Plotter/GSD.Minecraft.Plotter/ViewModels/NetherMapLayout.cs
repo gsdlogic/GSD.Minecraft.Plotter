@@ -17,12 +17,12 @@ public class NetherMapLayout : IMapLayout
     /// <summary>
     /// Gets the color used for the primary grid lines on the map.
     /// </summary>
-    public Color PrimaryGridColor => Color.FromArgb("#FFAA6666");
+    public Color PrimaryGridColor => Color.FromArgb("#FF990000");
 
     /// <summary>
     /// Gets the color used for rendering the secondary grid lines on the map.
     /// </summary>
-    public Color SecondaryGridColor => Color.FromArgb("#FF993333");
+    public Color SecondaryGridColor => Color.FromArgb("#FF660000");
 
     /// <summary>
     /// Calculates the map coordinates corresponding to the specified marker.

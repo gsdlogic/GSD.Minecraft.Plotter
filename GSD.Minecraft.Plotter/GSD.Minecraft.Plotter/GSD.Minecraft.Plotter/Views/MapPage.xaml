@@ -1,25 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:views="clr-namespace:GSD.Minecraft.Plotter.Views"
              xmlns:viewModels="clr-namespace:GSD.Minecraft.Plotter.ViewModels"
              x:Class="GSD.Minecraft.Plotter.Views.MapPage"
              x:DataType="viewModels:MapPageViewModel"
              Shell.NavBarIsVisible="True"
              Title="{Binding Title}">
+
   <ContentPage.ToolbarItems>
     <ToolbarItem Text="Overworld" Order="Secondary" Priority="0" Command="{Binding OverworldCommand}" />
     <ToolbarItem Text="Nether" Order="Secondary" Priority="1" Command="{Binding NetherCommand}" />
   </ContentPage.ToolbarItems>
 
   <Grid RowDefinitions="*,Auto">
-    <views:MapView Grid.Row="0" x:Name="MapView" MapDrawable="{Binding MapDrawable}" MapLayout="{Binding MapLayout}" />
+
+    <GraphicsView Grid.Row="0" x:Name="GraphicsView" Drawable="{Binding Drawable}">
+      <GraphicsView.GestureRecognizers>
+        <PanGestureRecognizer PanUpdated="OnPanUpdated" />
+        <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />
+      </GraphicsView.GestureRecognizers>
+    </GraphicsView>
+
     <VerticalStackLayout Grid.Row="1" Padding="10" Spacing="5">
-      <Label Text="{Binding MapDrawable.Zoom, Source={x:Reference MapView}, StringFormat='Zoom: {0:F4}'}"/>
-      <Label Text="{Binding MapDrawable.CenterX, Source={x:Reference MapView}, StringFormat='OffsetX: {0:F0}'}"/>
-      <Label Text="{Binding MapDrawable.CenterY, Source={x:Reference MapView}, StringFormat='OffsetY: {0:F0}'}"/>
-      <Label Text="{Binding MapDrawable.Markers.Count, Source={x:Reference MapView}, StringFormat='Markers: {0}'}"/>
+      <Label Text="{Binding Zoom, StringFormat='Zoom: {0:F4}'}" />
+      <Label Text="{Binding CenterX, StringFormat='OffsetX: {0:F0}'}" />
+      <Label Text="{Binding CenterY, StringFormat='OffsetY: {0:F0}'}" />
+      <Label Text="{Binding Markers.Count, StringFormat='Markers: {0}'}" />
     </VerticalStackLayout>
+    
   </Grid>
 
 </ContentPage>
