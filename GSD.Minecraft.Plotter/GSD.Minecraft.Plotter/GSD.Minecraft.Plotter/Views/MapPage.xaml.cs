@@ -13,6 +13,11 @@ using GSD.Minecraft.Plotter.ViewModels;
 public partial class MapPage
 {
     /// <summary>
+    /// Indicates whether the map page has been loaded and initialized.
+    /// </summary>
+    private bool loaded;
+
+    /// <summary>
     /// Indicates whether a pan gesture has started.
     /// </summary>
     private bool panStarted;
@@ -44,8 +49,7 @@ public partial class MapPage
     }
 
     /// <summary>
-    /// Handles the <see cref="GraphicsView.SizeChanged" /> event to update the viewport dimensions
-    /// in the associated <see cref="MapPageViewModel" />.
+    /// Handles the size changed event to update the viewport dimensions in the associated <see cref="MapPageViewModel" />.
     /// </summary>
     /// <param name="sender">The source of the event, typically the <see cref="GraphicsView" />.</param>
     /// <param name="e">The event data associated with the size change.</param>
@@ -55,6 +59,12 @@ public partial class MapPage
         {
             viewModel.ViewWidth = (float)this.GraphicsView.Width;
             viewModel.ViewHeight = (float)this.GraphicsView.Height;
+
+            if (!this.loaded)
+            {
+                viewModel.OnLoad();
+                this.loaded = true;
+            }
         }
     }
 

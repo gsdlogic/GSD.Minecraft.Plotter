@@ -124,16 +124,93 @@ public class MapPageViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Centers the map at the specified coordinates.
+    /// Centers the viewport on a specific world coordinate and adjusts the zoom level
+    /// so that the specified world radius fits within the smallest dimension of the viewport.
     /// </summary>
-    /// <param name="x">The X-coordinate to center the map on.</param>
-    /// <param name="y">The Y-coordinate to center the map on.</param>
-    public void CenterMap(float x, float y)
+    /// <param name="worldX">The target X coordinate in world units.</param>
+    /// <param name="worldY">The target Y coordinate in world units.</param>
+    /// <param name="worldRadius">The radius in world units that must fit within the screen.</param>
+    public void CenterAndScale(float worldX, float worldY, float worldRadius)
     {
-        this.CenterX = x;
-        this.CenterY = y;
+        if ((this.ViewWidth <= 0) || (this.ViewHeight <= 0) || (worldRadius <= 0))
+        {
+            return;
+        }
+
+        var zoomX = this.ViewWidth / (2.0f * worldRadius);
+        var zoomY = this.ViewHeight / (2.0f * worldRadius);
+
+        this.Zoom = Math.Min(Math.Max(Math.Min(zoomX, zoomY), 0.001f), 50.0f);
+        this.CenterX = 0.0f - (worldX * this.Zoom);
+        this.CenterY = 0.0f - (worldY * this.Zoom);
 
         this.OnInvalidateRequested();
+    }
+
+    /// <summary>
+    /// Centers the map at the specified coordinates.
+    /// </summary>
+    /// <param name="screenX">The X-coordinate to center the map on.</param>
+    /// <param name="screenY">The Y-coordinate to center the map on.</param>
+    public void CenterMap(float screenX, float screenY)
+    {
+        this.CenterX = screenX;
+        this.CenterY = screenY;
+
+        this.OnInvalidateRequested();
+    }
+
+    /// <summary>
+    /// Handles the initialization logic when the map page is loaded.
+    /// This method centers the map on a predefined world coordinate and scales it to fit a specific radius.
+    /// </summary>
+    public void OnLoad()
+    {
+        this.ZoomToExtents();
+    }
+
+    /// <summary>
+    /// Converts a screen coordinate on the X-axis to a world coordinate on the X-axis
+    /// based on the current camera settings, including zoom level and center offset.
+    /// </summary>
+    /// <param name="screenX">The X-coordinate in screen units to be converted.</param>
+    /// <returns>The corresponding X-coordinate in world units.</returns>
+    public float ScreenToWorldX(float screenX)
+    {
+        return (screenX - (this.ViewWidth / 2f) - this.CenterX) / this.Zoom;
+    }
+
+    /// <summary>
+    /// Converts a screen coordinate on the Y-axis to a world coordinate on the Y-axis
+    /// based on the current camera settings, including zoom level and center offset.
+    /// </summary>
+    /// <param name="screenY">The Y-coordinate in screen units to be converted.</param>
+    /// <returns>The corresponding Y-coordinate in world units.</returns>
+    public float ScreenToWorldY(float screenY)
+    {
+        return (screenY - (this.ViewHeight / 2f) - this.CenterY) / this.Zoom;
+    }
+
+    /// <summary>
+    /// Converts a world coordinate on the X-axis to a screen coordinate on the X-axis
+    /// based on the current camera settings, including zoom level and center offset.
+    /// </summary>
+    /// <param name="worldX">The X-coordinate in world units to be converted.</param>
+    /// <returns>The corresponding X-coordinate in screen units.</returns>
+    public float WorldToScreenX(float worldX)
+    {
+        return (this.ViewWidth / 2f) + this.CenterX + (worldX * this.Zoom);
+    }
+
+    /// <summary>
+    /// Converts a world coordinate on the Y-axis to a screen coordinate on the Y-axis
+    /// based on the current camera settings, including zoom level and center offset.
+    /// </summary>
+    /// <param name="worldY">The Y-coordinate in world units to be converted.</param>
+    /// <returns>The corresponding Y-coordinate in screen units.</returns>
+    public float WorldToScreenY(float worldY)
+    {
+        return (this.ViewHeight / 2f) + this.CenterY + (worldY * this.Zoom);
     }
 
     /// <summary>
@@ -144,8 +221,8 @@ public class MapPageViewModel : ViewModelBase
     /// <param name="originY">The Y-coordinate of the zoom origin in the view.</param>
     public void ZoomAndScale(float scale, float originX, float originY)
     {
-        var worldX = (originX - (this.ViewWidth / 2f) - this.CenterX) / this.Zoom;
-        var worldY = (originY - (this.ViewHeight / 2f) - this.CenterY) / this.Zoom;
+        var worldX = this.ScreenToWorldX(originX);
+        var worldY = this.ScreenToWorldY(originY);
 
         this.Zoom *= scale;
         this.Zoom = Math.Min(Math.Max(this.Zoom, 0.001f), 50.0f);
@@ -208,5 +285,24 @@ public class MapPageViewModel : ViewModelBase
     {
         var world = await this.appState.GetCurrentWorldAsync().ConfigureAwait(true);
         this.Title = world.Name;
+    }
+
+    /// <summary>
+    /// Adjusts the map view to ensure all markers are visible within the viewport.
+    /// </summary>
+    private void ZoomToExtents()
+    {
+        var minX = this.Markers.Min(m => this.Layout.GetMapCoordinate(m).X);
+        var minY = this.Markers.Min(m => this.Layout.GetMapCoordinate(m).Y);
+        var maxX = this.Markers.Max(m => this.Layout.GetMapCoordinate(m).X);
+        var maxY = this.Markers.Max(m => this.Layout.GetMapCoordinate(m).Y);
+
+        var radiusX = (maxX - minX) / 2.0f;
+        var radiusY = (maxY - minY) / 2.0f;
+        var centerX = minX + radiusX;
+        var centerY = minY + radiusY;
+        var radius = Math.Max(radiusX, radiusY);
+
+        this.CenterAndScale(centerX, centerY, radius * 1.5f);
     }
 }
