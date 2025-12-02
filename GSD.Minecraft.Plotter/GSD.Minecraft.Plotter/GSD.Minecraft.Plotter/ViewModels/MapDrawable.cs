@@ -55,28 +55,28 @@ public class MapDrawable : ViewModelBase, IDrawable
 
         var gridSpacing = 1;
 
-        while (this.viewModel.Zoom * gridSpacing < 16)
+        while (this.viewModel.Camera.Zoom * gridSpacing < 16)
         {
             gridSpacing *= 2;
         }
 
         var labelSpacing = gridSpacing * 2;
 
-        var worldMinX = this.viewModel.ScreenToWorldX(0);
-        var worldMaxX = this.viewModel.ScreenToWorldX(this.viewModel.ViewWidth);
+        var worldMinX = this.viewModel.Camera.ScreenToWorldX(0);
+        var worldMaxX = this.viewModel.Camera.ScreenToWorldX(this.viewModel.Camera.ViewportWidth);
         var startX = MathF.Floor(worldMinX / gridSpacing) * gridSpacing;
         var endX = MathF.Ceiling(worldMaxX);
 
         for (var x = startX; x <= endX; x += gridSpacing)
         {
-            var sx = this.viewModel.WorldToScreenX(x - 0.5f);
+            var sx = this.viewModel.Camera.WorldToScreenX(x - 0.5f);
             var floor = MathF.Floor(x);
             var isOrigin = floor == 0;
             var isChunkLine = floor % 16 == 0;
 
             canvas.StrokeSize = 1;
             canvas.StrokeColor = isOrigin ? originGridColor : isChunkLine ? primaryGidColor : secondaryGridColor;
-            canvas.DrawLine(sx, ViewTop, sx, ViewTop + this.viewModel.ViewHeight);
+            canvas.DrawLine(sx, ViewTop, sx, ViewTop + this.viewModel.Camera.ViewportHeight);
 
             if (floor % labelSpacing == 0)
             {
@@ -86,21 +86,21 @@ public class MapDrawable : ViewModelBase, IDrawable
             }
         }
 
-        var worldMinY = this.viewModel.ScreenToWorldY(ViewTop);
-        var worldMaxY = this.viewModel.ScreenToWorldY(ViewTop + this.viewModel.ViewHeight);
+        var worldMinY = this.viewModel.Camera.ScreenToWorldY(ViewTop);
+        var worldMaxY = this.viewModel.Camera.ScreenToWorldY(ViewTop + this.viewModel.Camera.ViewportHeight);
         var startY = MathF.Floor(worldMinY / gridSpacing) * gridSpacing;
         var endY = MathF.Ceiling(worldMaxY);
 
         for (var y = startY; y <= endY; y += gridSpacing)
         {
-            var sy = this.viewModel.WorldToScreenY(y - 0.5f);
+            var sy = this.viewModel.Camera.WorldToScreenY(y - 0.5f);
             var floor = MathF.Floor(y);
             var isOrigin = floor == 0;
             var isChunkLine = floor % 16 == 0;
 
             canvas.StrokeSize = 1;
             canvas.StrokeColor = isOrigin ? originGridColor : isChunkLine ? primaryGidColor : secondaryGridColor;
-            canvas.DrawLine(ViewLeft, sy, ViewLeft + this.viewModel.ViewWidth, sy);
+            canvas.DrawLine(ViewLeft, sy, ViewLeft + this.viewModel.Camera.ViewportWidth, sy);
 
             if (floor % labelSpacing == 0)
             {
@@ -117,22 +117,60 @@ public class MapDrawable : ViewModelBase, IDrawable
     /// <param name="canvas">The canvas on which the points will be drawn.</param>
     private void DrawPoints(ICanvas canvas)
     {
+        var pinned = this.viewModel.PinnedMarker;
+        var selected = this.viewModel.SelectedMarker;
+
         foreach (var marker in this.viewModel.Markers)
         {
             var point = this.viewModel.Layout?.GetMapCoordinate(marker) ?? (marker.X, marker.Y);
-            var floorX = (float)Math.Floor(point.X);
-            var floorY = (float)Math.Floor(point.Y);
+            var truncatedX = (float)Math.Truncate(point.X);
+            var truncatedY = (float)Math.Truncate(point.Y);
 
-            var screenX = this.viewModel.WorldToScreenX(floorX);
-            var screenY = this.viewModel.WorldToScreenY(floorY);
+            var screenX = this.viewModel.Camera.WorldToScreenX(truncatedX);
+            var screenY = this.viewModel.Camera.WorldToScreenY(truncatedY);
 
-            canvas.FillColor = Colors.White;
-            canvas.FillCircle(screenX, screenY, 10);
+            if ((marker != selected) && (marker != pinned))
+            {
+                canvas.FillColor = Colors.White;
+                canvas.FillCircle(screenX, screenY, 10);
+            }
 
             canvas.FontColor = Colors.White;
             canvas.FontSize = 14;
             canvas.DrawString($"{marker.Name}", screenX + 15, screenY - 8, HorizontalAlignment.Left);
-            canvas.DrawString($"{floorX},{floorY}", screenX + 15, screenY + 8, HorizontalAlignment.Left);
+            canvas.DrawString($"{truncatedX},{truncatedY}", screenX + 15, screenY + 8, HorizontalAlignment.Left);
+        }
+
+        if (selected != null)
+        {
+            var point = this.viewModel.Layout?.GetMapCoordinate(selected) ?? (selected.X, selected.Y);
+
+            var truncatedX = (float)Math.Truncate(point.X);
+            var truncatedY = (float)Math.Truncate(point.Y);
+
+            var screenX = this.viewModel.Camera.WorldToScreenX(truncatedX);
+            var screenY = this.viewModel.Camera.WorldToScreenY(truncatedY);
+
+            canvas.FillColor = Colors.Yellow;
+            canvas.StrokeColor = Colors.Yellow;
+            canvas.FillCircle(screenX, screenY, 10);
+            canvas.DrawCircle(screenX, screenY, 12);
+        }
+
+        if (pinned != null)
+        {
+            var point = this.viewModel.Layout?.GetMapCoordinate(pinned) ?? (pinned.X, pinned.Y);
+
+            var truncatedX = (float)Math.Truncate(point.X);
+            var truncatedY = (float)Math.Truncate(point.Y);
+
+            var screenX = this.viewModel.Camera.WorldToScreenX(truncatedX);
+            var screenY = this.viewModel.Camera.WorldToScreenY(truncatedY);
+
+            canvas.FillColor = Colors.Green;
+            canvas.StrokeColor = Colors.Green;
+            canvas.FillCircle(screenX, screenY, 10);
+            canvas.DrawCircle(screenX, screenY, 12);
         }
     }
 }

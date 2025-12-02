@@ -20,6 +20,11 @@ public class OverworldMapLayout : IMapLayout
     public Color PrimaryGridColor => Color.FromArgb("#FF999999");
 
     /// <summary>
+    /// Gets the scale of the layout relative to the standard unit.
+    /// </summary>
+    public float Scale => 1.0f;
+
+    /// <summary>
     /// Gets the color used for rendering the secondary grid lines on the map.
     /// </summary>
     public Color SecondaryGridColor => Color.FromArgb("#FF666666");

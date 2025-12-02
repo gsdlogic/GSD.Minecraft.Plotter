@@ -20,6 +20,11 @@ public interface IMapLayout
     Color PrimaryGridColor { get; }
 
     /// <summary>
+    /// Gets the scale of the layout relative to the standard unit.
+    /// </summary>
+    float Scale { get; }
+
+    /// <summary>
     /// Gets the color used for rendering the secondary grid lines on the map.
     /// </summary>
     Color SecondaryGridColor { get; }

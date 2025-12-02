@@ -10,6 +10,52 @@ namespace GSD.Minecraft.Plotter.ViewModels;
 public class MarkerViewModel : ViewModelBase
 {
     /// <summary>
+    /// The cardinal directions.
+    /// </summary>
+    private readonly string[] directions =
+    [
+        "N", "NNE", "NE", "ENE",
+        "E", "ESE", "SE", "SSE",
+        "S", "SSW", "SW", "WSW",
+        "W", "WNW", "NW", "NNW",
+    ];
+
+    /// <summary>
+    /// Gets the bearing to the pinned marker.
+    /// </summary>
+    public float Bearing
+    {
+        get => this.GetValue<float>();
+        private set
+        {
+            var truncated = (float)Math.Truncate(value);
+            this.SetValue(truncated);
+        }
+    }
+
+    /// <summary>
+    /// Gets the cardinal direction from the pinned marker.
+    /// </summary>
+    public string Direction
+    {
+        get => this.GetValue<string>();
+        private set => this.SetValue(value);
+    }
+
+    /// <summary>
+    /// Gets the distance from the pinned marker.
+    /// </summary>
+    public float Distance
+    {
+        get => this.GetValue<float>();
+        private set
+        {
+            var truncated = (float)Math.Truncate(value);
+            this.SetValue(truncated);
+        }
+    }
+
+    /// <summary>
     /// Gets or sets the unique identifier for the marker.
     /// </summary>
     public int Id { get; set; }
@@ -24,12 +70,56 @@ public class MarkerViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Gets the X-coordinate of the marker in the nether.
+    /// </summary>
+    public float NetherX
+    {
+        get => this.GetValue<float>();
+        private set
+        {
+            var truncated = (float)Math.Truncate(value);
+            this.SetValue(truncated);
+        }
+    }
+
+    /// <summary>
+    /// Gets the Y-coordinate of the marker in the nether.
+    /// </summary>
+    public float NetherY
+    {
+        get => this.GetValue<float>();
+        private set
+        {
+            var truncated = (float)Math.Truncate(value);
+            this.SetValue(truncated);
+        }
+    }
+
+    /// <summary>
+    /// Gets the Z-coordinate of the marker in the nether.
+    /// </summary>
+    public float NetherZ
+    {
+        get => this.GetValue<float>();
+        private set
+        {
+            var truncated = (float)Math.Truncate(value);
+            this.SetValue(truncated);
+        }
+    }
+
+    /// <summary>
     /// Gets or sets the X-coordinate of the marker.
     /// </summary>
     public float X
     {
         get => this.GetValue<float>();
-        set => this.SetValue(value);
+        set
+        {
+            var truncated = (float)Math.Truncate(value);
+            this.SetValue(truncated);
+            this.NetherX = truncated / 8.0f;
+        }
     }
 
     /// <summary>
@@ -38,7 +128,12 @@ public class MarkerViewModel : ViewModelBase
     public float Y
     {
         get => this.GetValue<float>();
-        set => this.SetValue(value);
+        set
+        {
+            var truncated = (float)Math.Truncate(value);
+            this.SetValue(truncated);
+            this.NetherY = truncated / 8.0f;
+        }
     }
 
     /// <summary>
@@ -47,6 +142,30 @@ public class MarkerViewModel : ViewModelBase
     public float Z
     {
         get => this.GetValue<float>();
-        set => this.SetValue(value);
+        set
+        {
+            var truncated = (float)Math.Truncate(value);
+            this.SetValue(truncated);
+            this.NetherZ = truncated / 8.0f;
+        }
+    }
+
+    /// <summary>
+    /// Updates the pinned marker.
+    /// </summary>
+    /// <param name="pinned">The pinned marker.</param>
+    public void PinTo(MarkerViewModel pinned)
+    {
+        const int Slices = 360 / 16;
+
+        if (pinned == null)
+        {
+            this.Distance = 0.0f;
+            return;
+        }
+
+        this.Distance = (float)Math.Sqrt(Math.Pow(this.X - pinned.X, 2) + Math.Pow(this.Z - pinned.Z, 2));
+        this.Bearing = (float)(Math.Atan2(this.X - pinned.X, pinned.Z - this.Z) * (180.0 / Math.PI));
+        this.Direction = this.directions[(((int)this.Bearing + 360) / Slices) % 16];
     }
 }

@@ -33,10 +33,11 @@ public class MapPageViewModel : ViewModelBase
         this.appState.CurrentWorldChanged += this.OnCurrentWorldChanged;
         this.appState.MarkersChanged += this.OnMarkersChanged;
 
-        this.OverworldCommand = new Command(() => this.Layout = new OverworldMapLayout());
-        this.NetherCommand = new Command(() => this.Layout = new NetherMapLayout());
+        this.OverworldCommand = new Command(() => this.SetLayout(new OverworldMapLayout()));
+        this.NetherCommand = new Command(() => this.SetLayout(new NetherMapLayout()));
+        this.PinCommand = new Command(this.PinSelectedMarker);
 
-        this.Zoom = 1.0f;
+        this.Camera = new Camera();
         this.Layout = new OverworldMapLayout();
         this.Drawable = new MapDrawable(this);
 
@@ -45,27 +46,10 @@ public class MapPageViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Occurs when the map view requires invalidation.
+    /// Gets the camera view model that manages viewport transformations, zooming, and panning
+    /// for rendering and interacting with the 2D map.
     /// </summary>
-    public event EventHandler InvalidateRequested;
-
-    /// <summary>
-    /// Gets or sets the X-component for the center of the map relative to the view.
-    /// </summary>
-    public float CenterX
-    {
-        get => this.GetValue<float>();
-        set => this.SetValue(value);
-    }
-
-    /// <summary>
-    /// Gets or sets the Y-component for the center of the map relative to the view.
-    /// </summary>
-    public float CenterY
-    {
-        get => this.GetValue<float>();
-        set => this.SetValue(value);
-    }
+    public Camera Camera { get; }
 
     /// <summary>
     /// Gets the map drawable.
@@ -78,11 +62,7 @@ public class MapPageViewModel : ViewModelBase
     public IMapLayout Layout
     {
         get => this.GetValue<IMapLayout>();
-        set
-        {
-            this.SetValue(value);
-            this.OnInvalidateRequested();
-        }
+        set => this.SetValue(value);
     }
 
     /// <summary>
@@ -101,68 +81,35 @@ public class MapPageViewModel : ViewModelBase
     public ICommand OverworldCommand { get; }
 
     /// <summary>
+    /// Gets the command to pin the selected marker.
+    /// </summary>
+    public ICommand PinCommand { get; }
+
+    /// <summary>
+    /// Gets or sets the currently selected marker on the map.
+    /// </summary>
+    public MarkerViewModel PinnedMarker
+    {
+        get => this.GetValue<MarkerViewModel>();
+        set => this.SetValue(value);
+    }
+
+    /// <summary>
+    /// Gets or sets the currently selected marker on the map.
+    /// </summary>
+    public MarkerViewModel SelectedMarker
+    {
+        get => this.GetValue<MarkerViewModel>();
+        set => this.SetValue(value);
+    }
+
+    /// <summary>
     /// Gets or sets the title of the map page, which dynamically reflects the name of the current world.
     /// </summary>
     public string Title
     {
         get => this.GetValue<string>();
         set => this.SetValue(value);
-    }
-
-    /// <summary>
-    /// Gets or sets the height of the viewport used for rendering the map.
-    /// </summary>
-    public float ViewHeight { get; set; }
-
-    /// <summary>
-    /// Gets or sets the width of the viewport used for rendering the map.
-    /// </summary>
-    public float ViewWidth { get; set; }
-
-    /// <summary>
-    /// Gets or sets the zoom level.
-    /// </summary>
-    public float Zoom
-    {
-        get => this.GetValue<float>();
-        set => this.SetValue(value);
-    }
-
-    /// <summary>
-    /// Centers the viewport on a specific world coordinate and adjusts the zoom level
-    /// so that the specified world radius fits within the smallest dimension of the viewport.
-    /// </summary>
-    /// <param name="worldX">The target X coordinate in world units.</param>
-    /// <param name="worldY">The target Y coordinate in world units.</param>
-    /// <param name="worldRadius">The radius in world units that must fit within the screen.</param>
-    public void CenterAndScale(float worldX, float worldY, float worldRadius)
-    {
-        if ((this.ViewWidth <= 0) || (this.ViewHeight <= 0) || (worldRadius <= 0))
-        {
-            return;
-        }
-
-        var zoomX = this.ViewWidth / (2.0f * worldRadius);
-        var zoomY = this.ViewHeight / (2.0f * worldRadius);
-
-        this.Zoom = Math.Min(Math.Max(Math.Min(zoomX, zoomY), 0.001f), 50.0f);
-        this.CenterX = 0.0f - (worldX * this.Zoom);
-        this.CenterY = 0.0f - (worldY * this.Zoom);
-
-        this.OnInvalidateRequested();
-    }
-
-    /// <summary>
-    /// Centers the map at the specified coordinates.
-    /// </summary>
-    /// <param name="screenX">The X-coordinate to center the map on.</param>
-    /// <param name="screenY">The Y-coordinate to center the map on.</param>
-    public void CenterMap(float screenX, float screenY)
-    {
-        this.CenterX = screenX;
-        this.CenterY = screenY;
-
-        this.OnInvalidateRequested();
     }
 
     /// <summary>
@@ -175,75 +122,47 @@ public class MapPageViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Converts a screen coordinate on the X-axis to a world coordinate on the X-axis
-    /// based on the current camera settings, including zoom level and center offset.
+    /// Selects or interacts with an element on the map at the specified world coordinates.
     /// </summary>
-    /// <param name="screenX">The X-coordinate in screen units to be converted.</param>
-    /// <returns>The corresponding X-coordinate in world units.</returns>
-    public float ScreenToWorldX(float screenX)
+    /// <param name="worldX">The X-coordinate in world space where the interaction occurs.</param>
+    /// <param name="worldY">The Y-coordinate in world space where the interaction occurs.</param>
+    public void Pick(float worldX, float worldY)
     {
-        return (screenX - (this.ViewWidth / 2f) - this.CenterX) / this.Zoom;
-    }
+        var radius = 1;
 
-    /// <summary>
-    /// Converts a screen coordinate on the Y-axis to a world coordinate on the Y-axis
-    /// based on the current camera settings, including zoom level and center offset.
-    /// </summary>
-    /// <param name="screenY">The Y-coordinate in screen units to be converted.</param>
-    /// <returns>The corresponding Y-coordinate in world units.</returns>
-    public float ScreenToWorldY(float screenY)
-    {
-        return (screenY - (this.ViewHeight / 2f) - this.CenterY) / this.Zoom;
-    }
+        while (this.Camera.Zoom * radius < 16)
+        {
+            radius *= 2;
+        }
 
-    /// <summary>
-    /// Converts a world coordinate on the X-axis to a screen coordinate on the X-axis
-    /// based on the current camera settings, including zoom level and center offset.
-    /// </summary>
-    /// <param name="worldX">The X-coordinate in world units to be converted.</param>
-    /// <returns>The corresponding X-coordinate in screen units.</returns>
-    public float WorldToScreenX(float worldX)
-    {
-        return (this.ViewWidth / 2f) + this.CenterX + (worldX * this.Zoom);
-    }
+        var markers = this.Markers.Where(m =>
+            {
+                var point = this.Layout.GetMapCoordinate(m);
+                return (Math.Abs(point.X - worldX) <= radius) &&
+                       (Math.Abs(point.Y - worldY) <= radius);
+            })
+            .ToList();
 
-    /// <summary>
-    /// Converts a world coordinate on the Y-axis to a screen coordinate on the Y-axis
-    /// based on the current camera settings, including zoom level and center offset.
-    /// </summary>
-    /// <param name="worldY">The Y-coordinate in world units to be converted.</param>
-    /// <returns>The corresponding Y-coordinate in screen units.</returns>
-    public float WorldToScreenY(float worldY)
-    {
-        return (this.ViewHeight / 2f) + this.CenterY + (worldY * this.Zoom);
-    }
+        switch (markers.Count)
+        {
+            case 0:
+                this.SelectedMarker = null;
+                break;
 
-    /// <summary>
-    /// Adjusts the zoom level and repositions the map's center based on the specified scale, origin, and view dimensions.
-    /// </summary>
-    /// <param name="scale">The zoom scale factor to apply.</param>
-    /// <param name="originX">The X-coordinate of the zoom origin in the view.</param>
-    /// <param name="originY">The Y-coordinate of the zoom origin in the view.</param>
-    public void ZoomAndScale(float scale, float originX, float originY)
-    {
-        var worldX = this.ScreenToWorldX(originX);
-        var worldY = this.ScreenToWorldY(originY);
+            case 1:
+                this.SelectedMarker = markers[0];
+                break;
 
-        this.Zoom *= scale;
-        this.Zoom = Math.Min(Math.Max(this.Zoom, 0.001f), 50.0f);
+            default:
+            {
+                var index = (markers.IndexOf(this.SelectedMarker) + 1) % markers.Count;
+                this.SelectedMarker = markers[index];
+                break;
+            }
+        }
 
-        this.CenterX = originX - (worldX * this.Zoom) - (this.ViewWidth / 2f);
-        this.CenterY = originY - (worldY * this.Zoom) - (this.ViewHeight / 2f);
-
-        this.OnInvalidateRequested();
-    }
-
-    /// <summary>
-    /// Raises the <see cref="InvalidateRequested" /> event to notify subscribers that the map view requires redrawing.
-    /// </summary>
-    protected virtual void OnInvalidateRequested()
-    {
-        this.InvalidateRequested?.Invoke(this, EventArgs.Empty);
+        this.SelectedMarker?.PinTo(this.PinnedMarker);
+        this.Camera.Invalidate();
     }
 
     /// <summary>
@@ -274,6 +193,33 @@ public class MapPageViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Pins the selected marker.
+    /// </summary>
+    private void PinSelectedMarker()
+    {
+        (this.PinnedMarker, this.SelectedMarker) = (this.SelectedMarker, this.PinnedMarker);
+        this.SelectedMarker?.PinTo(this.PinnedMarker);
+        this.Camera.Invalidate();
+    }
+
+    /// <summary>
+    /// Updates the map layout and adjusts the camera to maintain the current view's center position.
+    /// </summary>
+    /// <param name="layout">The new map layout to apply.</param>
+    private void SetLayout(IMapLayout layout)
+    {
+        if (layout == this.Layout)
+        {
+            return;
+        }
+
+        var scaleRatio = layout.Scale / this.Layout.Scale;
+        this.Layout = layout;
+
+        this.Camera.ScaleCenter(scaleRatio);
+    }
+
+    /// <summary>
     /// Updates the markers displayed on the map by synchronizing them with the current state of the application.
     /// </summary>
     /// ReSharper disable once AsyncVoidMethod
@@ -286,6 +232,13 @@ public class MapPageViewModel : ViewModelBase
         foreach (var marker in markers)
         {
             this.Markers.Add(marker.ToViewModel());
+        }
+
+        if (this.Markers.Count > 0)
+        {
+            this.PinnedMarker = this.Markers[0];
+            this.SelectedMarker = this.Markers[0];
+            this.SelectedMarker.PinTo(this.PinnedMarker);
         }
     }
 
@@ -315,6 +268,6 @@ public class MapPageViewModel : ViewModelBase
         var centerY = minY + radiusY;
         var radius = Math.Max(radiusX, radiusY);
 
-        this.CenterAndScale(centerX, centerY, radius * 1.5f);
+        this.Camera.CenterAndFit(centerX, centerY, radius * 1.5f);
     }
 }

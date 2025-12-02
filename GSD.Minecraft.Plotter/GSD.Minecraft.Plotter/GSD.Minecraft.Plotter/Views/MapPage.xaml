@@ -18,16 +18,60 @@
       <GraphicsView.GestureRecognizers>
         <PanGestureRecognizer PanUpdated="OnPanUpdated" />
         <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />
+        <TapGestureRecognizer Tapped="OnTapped" />
       </GraphicsView.GestureRecognizers>
     </GraphicsView>
 
-    <VerticalStackLayout Grid.Row="1" Padding="10" Spacing="5">
-      <Label Text="{Binding Zoom, StringFormat='Zoom: {0:F4}'}" />
-      <Label Text="{Binding CenterX, StringFormat='OffsetX: {0:F0}'}" />
-      <Label Text="{Binding CenterY, StringFormat='OffsetY: {0:F0}'}" />
+    <Grid Grid.Row="1" ColumnDefinitions="*,*">
+
+      <Border Grid.Column="0" Margin="2" Stroke="Green">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto,Auto,Auto" Padding="10" RowSpacing="5" ColumnSpacing="10">
+          <Label Grid.Row="0" Grid.Column="0" Text="{Binding PinnedMarker.Name}" />
+          <Label Grid.Row="0" Grid.Column="1" Text="X" HorizontalTextAlignment="End" />
+          <Label Grid.Row="0" Grid.Column="2" Text="Y" HorizontalTextAlignment="End" />
+          <Label Grid.Row="0" Grid.Column="3" Text="Z" HorizontalTextAlignment="End" />
+          <Label Grid.Row="1" Grid.Column="0" Text="Overworld" />
+          <Label Grid.Row="1" Grid.Column="1" Text="{Binding PinnedMarker.X}" HorizontalTextAlignment="End" />
+          <Label Grid.Row="1" Grid.Column="2" Text="{Binding PinnedMarker.Y}" HorizontalTextAlignment="End" />
+          <Label Grid.Row="1" Grid.Column="3" Text="{Binding PinnedMarker.Z}" HorizontalTextAlignment="End" />
+          <Label Grid.Row="2" Grid.Column="0" Text="Nether" />
+          <Label Grid.Row="2" Grid.Column="1" Text="{Binding PinnedMarker.NetherX}" HorizontalTextAlignment="End" />
+          <Label Grid.Row="2" Grid.Column="2" Text="{Binding PinnedMarker.NetherY}" HorizontalTextAlignment="End" />
+          <Label Grid.Row="2" Grid.Column="3" Text="{Binding PinnedMarker.NetherZ}" HorizontalTextAlignment="End" />
+        </Grid>
+      </Border>
+
+      <Border Grid.Column="1" Margin="2" Stroke="Yellow">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto,Auto,Auto" Padding="10" RowSpacing="5" ColumnSpacing="10">
+          <Label Grid.Row="0" Grid.Column="0" Text="{Binding SelectedMarker.Name}" />
+          <Label Grid.Row="0" Grid.Column="1" Text="X" HorizontalTextAlignment="End" />
+          <Label Grid.Row="0" Grid.Column="2" Text="Y" HorizontalTextAlignment="End" />
+          <Label Grid.Row="0" Grid.Column="3" Text="Z" HorizontalTextAlignment="End" />
+          <Label Grid.Row="1" Grid.Column="0" Text="Overworld" />
+          <Label Grid.Row="1" Grid.Column="1" Text="{Binding SelectedMarker.X}" HorizontalTextAlignment="End" />
+          <Label Grid.Row="1" Grid.Column="2" Text="{Binding SelectedMarker.Y}" HorizontalTextAlignment="End" />
+          <Label Grid.Row="1" Grid.Column="3" Text="{Binding SelectedMarker.Z}" HorizontalTextAlignment="End" />
+          <Label Grid.Row="2" Grid.Column="0" Text="Nether" />
+          <Label Grid.Row="2" Grid.Column="1" Text="{Binding SelectedMarker.NetherX}" HorizontalTextAlignment="End" />
+          <Label Grid.Row="2" Grid.Column="2" Text="{Binding SelectedMarker.NetherY}" HorizontalTextAlignment="End" />
+          <Label Grid.Row="2" Grid.Column="3" Text="{Binding SelectedMarker.NetherZ}" HorizontalTextAlignment="End" />
+          <Label Grid.Row="3" Grid.Column="0" Text="Distance/Bearing" />
+          <Label Grid.Row="3" Grid.Column="1" Text="{Binding SelectedMarker.Distance}" HorizontalTextAlignment="End" />
+          <Label Grid.Row="3" Grid.Column="2" Text="{Binding SelectedMarker.Direction}" HorizontalTextAlignment="End" />
+          <Label Grid.Row="3" Grid.Column="3" Text="{Binding SelectedMarker.Bearing}" HorizontalTextAlignment="End" />
+          <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4" Text="&lt;&lt; Pin" Command="{Binding PinCommand}" HorizontalOptions="End" VerticalOptions="Center"/>
+        </Grid>
+      </Border>
+
+    </Grid>
+
+    <!--<VerticalStackLayout Grid.Row="1" Padding="10" Spacing="5">
+      <Label Text="{Binding Camera.Zoom, StringFormat='Zoom: {0:F4}'}" />
+      <Label Text="{Binding Camera.OffsetX, StringFormat='OffsetX: {0:F0}'}" />
+      <Label Text="{Binding Camera.OffsetY, StringFormat='OffsetY: {0:F0}'}" />
       <Label Text="{Binding Markers.Count, StringFormat='Markers: {0}'}" />
-    </VerticalStackLayout>
-    
+    </VerticalStackLayout>-->
+
   </Grid>
 
 </ContentPage>

@@ -20,6 +20,11 @@ public class NetherMapLayout : IMapLayout
     public Color PrimaryGridColor => Color.FromArgb("#FF990000");
 
     /// <summary>
+    /// Gets the scale of the layout relative to the standard unit.
+    /// </summary>
+    public float Scale => 1.0f / 8.0f;
+
+    /// <summary>
     /// Gets the color used for rendering the secondary grid lines on the map.
     /// </summary>
     public Color SecondaryGridColor => Color.FromArgb("#FF660000");
@@ -34,6 +39,6 @@ public class NetherMapLayout : IMapLayout
     public (float X, float Y) GetMapCoordinate(MarkerViewModel marker)
     {
         ArgumentNullException.ThrowIfNull(marker);
-        return (marker.X / 8f, marker.Z / 8f);
+        return (marker.X / 8.0f, marker.Z / 8.0f);
     }
 }

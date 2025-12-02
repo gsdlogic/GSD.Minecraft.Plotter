@@ -44,8 +44,18 @@ public partial class MapPage
         this.InitializeComponent();
         this.BindingContext = viewModel;
 
-        viewModel.InvalidateRequested += this.OnInvalidateRequested;
-        platformZoomHandler?.AttachTo(this.GraphicsView, viewModel.ZoomAndScale);
+        viewModel.Camera.Invalidated += this.OnCameraInvalidated;
+        platformZoomHandler?.AttachTo(this.GraphicsView, (scale, screenX, screenY) => viewModel.Camera.ZoomAt(screenX, screenY, scale));
+    }
+
+    /// <summary>
+    /// Handles the <see cref="Camera.Invalidated" /> event to trigger a redraw of the map view.
+    /// </summary>
+    /// <param name="sender">The source of the event, typically the <see cref="MapPageViewModel" />.</param>
+    /// <param name="e">The event data associated with the invalidate request.</param>
+    private void OnCameraInvalidated(object sender, EventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() => { this.GraphicsView.Invalidate(); });
     }
 
     /// <summary>
@@ -57,8 +67,7 @@ public partial class MapPage
     {
         if (this.BindingContext is MapPageViewModel viewModel)
         {
-            viewModel.ViewWidth = (float)this.GraphicsView.Width;
-            viewModel.ViewHeight = (float)this.GraphicsView.Height;
+            viewModel.Camera.SetViewport((float)this.GraphicsView.Width, (float)this.GraphicsView.Height);
 
             if (!this.loaded)
             {
@@ -66,16 +75,6 @@ public partial class MapPage
                 this.loaded = true;
             }
         }
-    }
-
-    /// <summary>
-    /// Handles the <see cref="MapPageViewModel.InvalidateRequested" /> event to trigger a redraw of the map view.
-    /// </summary>
-    /// <param name="sender">The source of the event, typically the <see cref="MapPageViewModel" />.</param>
-    /// <param name="e">The event data associated with the invalidate request.</param>
-    private void OnInvalidateRequested(object sender, EventArgs e)
-    {
-        MainThread.BeginInvokeOnMainThread(() => { this.GraphicsView.Invalidate(); });
     }
 
     /// <summary>
@@ -91,12 +90,12 @@ public partial class MapPage
             {
                 case GestureStatus.Started:
                     this.panStarted = true;
-                    this.startOffsetX = viewModel.CenterX;
-                    this.startOffsetY = viewModel.CenterY;
+                    this.startOffsetX = viewModel.Camera.OffsetX;
+                    this.startOffsetY = viewModel.Camera.OffsetY;
                     break;
 
                 case GestureStatus.Running when this.panStarted:
-                    viewModel.CenterMap(this.startOffsetX + (float)e.TotalX, this.startOffsetY + (float)e.TotalY);
+                    viewModel.Camera.SetOffset(this.startOffsetX + (float)e.TotalX, this.startOffsetY + (float)e.TotalY);
                     break;
 
                 case GestureStatus.Completed:
@@ -120,9 +119,31 @@ public partial class MapPage
             return;
         }
 
-        viewModel.ZoomAndScale(
-            (float)e.Scale,
+        viewModel.Camera.ZoomAt(
             (float)(e.ScaleOrigin.X * this.GraphicsView.Width),
-            (float)(e.ScaleOrigin.Y * this.GraphicsView.Height));
+            (float)(e.ScaleOrigin.Y * this.GraphicsView.Height),
+            (float)e.Scale);
+    }
+
+    /// <summary>
+    /// Handles the tap gesture on the map view, converting the tapped screen position
+    /// into world coordinates and invoking the <see cref="MapPageViewModel.Pick" /> method
+    /// to process the interaction.
+    /// </summary>
+    /// <param name="sender">The source of the event, typically the <see cref="GraphicsView" />.</param>
+    /// <param name="e">The event data containing details about the tap gesture, including the position.</param>
+    private void OnTapped(object sender, TappedEventArgs e)
+    {
+        var point = e.GetPosition(this.GraphicsView);
+
+        if (!point.HasValue || this.BindingContext is not MapPageViewModel viewModel)
+        {
+            return;
+        }
+
+        var worldX = viewModel.Camera.ScreenToWorldX((float)point.Value.X);
+        var worldY = viewModel.Camera.ScreenToWorldY((float)point.Value.Y);
+
+        viewModel.Pick(worldX, worldY);
     }
 }
