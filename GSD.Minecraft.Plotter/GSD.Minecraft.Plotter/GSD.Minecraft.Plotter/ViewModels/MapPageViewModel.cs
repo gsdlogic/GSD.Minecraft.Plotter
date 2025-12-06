@@ -391,7 +391,7 @@ public class MapPageViewModel : ViewModelBase
     private void PinSelectedMarker()
     {
         this.PinnedMarker = this.PinnedMarker == this.SelectedMarker ? null : this.SelectedMarker;
-        this.ShowPinnedCoordinates = true;
+        this.ShowPinnedCoordinates = this.PinnedMarker != null;
         this.Camera.Invalidate();
     }
 
@@ -427,6 +427,7 @@ public class MapPageViewModel : ViewModelBase
     private async void UpdateMarkers()
     {
         var markers = await this.appState.GetMarkersAsync().ConfigureAwait(false);
+        var selectedMarker = this.SelectedMarker;
 
         this.Markers.Clear();
 
@@ -435,10 +436,9 @@ public class MapPageViewModel : ViewModelBase
             this.Markers.Add(marker.ToViewModel());
         }
 
-        if (this.Markers.Count > 0)
-        {
-            this.SelectedMarker = this.Markers[0];
-        }
+        this.SelectedMarker = selectedMarker != null ?
+            this.Markers.FirstOrDefault(m => m.Id == selectedMarker.Id) :
+            null;
     }
 
     /// <summary>
