@@ -32,14 +32,15 @@
       <Border Margin="2" Stroke="Gray">
         <HorizontalStackLayout Padding="5" Spacing="5">
           <Button Text="Pin" Command="{Binding PinCommand}" />
-          <Button Text="Chunk" Command="{Binding ChunkCommand}" />
-          <Button Text="Reset" Command="{Binding ResetCommand}" />
+          <Button Text="Extents" Command="{Binding ZoomToExtentsCommand}" />
+          <Button Text="Chunk" Command="{Binding ZoomToChunkCommand}" />
+          <Button Text="Align" Command="{Binding ToggleAlignmentCommand}" />
         </HorizontalStackLayout>
       </Border>
 
       <Grid ColumnDefinitions="Auto,*,Auto">
 
-        <Border Grid.Column="0" Margin="2" Stroke="Green" IsVisible="{Binding PinnedMarker, Converter={StaticResource IsNotNullVisibilityConverter}}">
+        <Border Grid.Column="0" Margin="2" Stroke="Green" IsVisible="{Binding ShowPinnedCoordinates}">
           <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto,Auto,Auto" Padding="10" RowSpacing="5" ColumnSpacing="10">
             <Label Grid.Row="0" Grid.Column="0" Text="{Binding PinnedMarker.Name}" />
             <Label Grid.Row="0" Grid.Column="1" Text="X" HorizontalTextAlignment="End" />
@@ -75,7 +76,7 @@
           </Grid>
         </Border>
 
-        <Border Grid.Column="2" Margin="2" Stroke="Gray" HorizontalOptions="Center" VerticalOptions="Center" Padding="5" IsVisible="{Binding ShowChunkAlignment}">
+        <Border Grid.Column="2" Margin="2" Stroke="Gray" Padding="5" IsVisible="{Binding ShowAlignmentButtons}">
           <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,Auto,Auto" RowSpacing="2" ColumnSpacing="2">
             <Button Grid.Row="0" Grid.Column="0" Text="&#x2196;" Command="{Binding MoveMarkerCommand}" CommandParameter="0" />
             <Button Grid.Row="0" Grid.Column="1" Text="&#x2191;" Command="{Binding MoveMarkerCommand}" CommandParameter="1" />

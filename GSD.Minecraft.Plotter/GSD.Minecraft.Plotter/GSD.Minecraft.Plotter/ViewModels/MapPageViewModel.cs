@@ -46,9 +46,10 @@ public class MapPageViewModel : ViewModelBase
 
         this.OverworldCommand = new Command(() => this.SetLayout(new OverworldMapLayout()));
         this.NetherCommand = new Command(() => this.SetLayout(new NetherMapLayout()));
-        this.ChunkCommand = new Command(this.ChunkAlign);
         this.PinCommand = new Command(this.PinSelectedMarker);
-        this.ResetCommand = new Command(this.ZoomToExtents);
+        this.ToggleAlignmentCommand = new Command(this.ToggleAlignmentButtons);
+        this.ZoomToChunkCommand = new Command(this.ZoomToChunk);
+        this.ZoomToExtentsCommand = new Command(this.ZoomToExtents);
         this.MoveMarkerCommand = new Command(this.MoveMarker);
 
         this.Camera = new Camera();
@@ -64,11 +65,6 @@ public class MapPageViewModel : ViewModelBase
     /// for rendering and interacting with the 2D map.
     /// </summary>
     public Camera Camera { get; }
-
-    /// <summary>
-    /// Gets the command chunk align the selected marker.
-    /// </summary>
-    public ICommand ChunkCommand { get; }
 
     /// <summary>
     /// Gets the map drawable.
@@ -127,11 +123,6 @@ public class MapPageViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets the command to reset the map.
-    /// </summary>
-    public ICommand ResetCommand { get; }
-
-    /// <summary>
     /// Gets or sets the currently selected marker on the map.
     /// </summary>
     public MarkerViewModel SelectedMarker
@@ -147,10 +138,39 @@ public class MapPageViewModel : ViewModelBase
     /// <summary>
     /// Gets or sets a value indicating whether the chunk alignment buttons are displayed on the map.
     /// </summary>
-    public bool ShowChunkAlignment
+    public bool ShowAlignmentButtons
     {
         get => this.GetValue<bool>();
-        set => this.SetValue(value);
+        set
+        {
+            this.SetValue(value);
+
+            if (value)
+            {
+                this.ShowPinnedCoordinates = false;
+            }
+            else if ((this.PinnedMarker != null) && !this.ShowPinnedCoordinates)
+            {
+                this.ShowPinnedCoordinates = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the pinned coordinates should be displayed.
+    /// </summary>
+    public bool ShowPinnedCoordinates
+    {
+        get => this.GetValue<bool>();
+        set
+        {
+            this.SetValue(value);
+
+            if (value)
+            {
+                this.ShowAlignmentButtons = false;
+            }
+        }
     }
 
     /// <summary>
@@ -161,6 +181,21 @@ public class MapPageViewModel : ViewModelBase
         get => this.GetValue<string>();
         set => this.SetValue(value);
     }
+
+    /// <summary>
+    /// Gets the command that toggles the visibility of alignment buttons on the map page.
+    /// </summary>
+    public ICommand ToggleAlignmentCommand { get; }
+
+    /// <summary>
+    /// Gets the command that zooms the map view to the currently selected chunk.
+    /// </summary>
+    public ICommand ZoomToChunkCommand { get; }
+
+    /// <summary>
+    /// Gets the command that zooms the map view to fit all drawable elements within the visible area.
+    /// </summary>
+    public ICommand ZoomToExtentsCommand { get; }
 
     /// <summary>
     /// Handles the initialization logic when the map page is loaded.
@@ -253,25 +288,6 @@ public class MapPageViewModel : ViewModelBase
         marker.Bearing = (float)(Math.Atan2(markerPoint.X - pinnedPoint.X, pinnedPoint.Y - markerPoint.Y) * (180.0 / Math.PI));
         marker.Direction = this.directions[(((int)marker.Bearing + 360) / Slices) % 16];
         marker.DistanceBearing = $"{marker.Distance}, {marker.Bearing}° {marker.Direction}";
-    }
-
-    /// <summary>
-    /// Aligns the selected marker to the chunk.
-    /// </summary>
-    private void ChunkAlign()
-    {
-        this.ShowChunkAlignment = !this.ShowChunkAlignment;
-
-        if (!this.ShowChunkAlignment)
-        {
-            return;
-        }
-
-        var point = this.Layout.GetMapCoordinate(this.SelectedMarker);
-        var chunkX = (float)Math.Floor(point.X / 16.0f) * 16.0f;
-        var chunkY = (float)Math.Floor(point.Y / 16.0f) * 16.0f;
-
-        this.Camera.CenterAndFit(chunkX + 8.0f, chunkY + 8.0f, 10);
     }
 
     /// <summary>
@@ -375,6 +391,7 @@ public class MapPageViewModel : ViewModelBase
     private void PinSelectedMarker()
     {
         this.PinnedMarker = this.PinnedMarker == this.SelectedMarker ? null : this.SelectedMarker;
+        this.ShowPinnedCoordinates = true;
         this.Camera.Invalidate();
     }
 
@@ -393,6 +410,14 @@ public class MapPageViewModel : ViewModelBase
         this.Layout = layout;
 
         this.Camera.ScaleCenter(scaleRatio);
+    }
+
+    /// <summary>
+    /// Toggles the visibility of alignment buttons on the map page.
+    /// </summary>
+    private void ToggleAlignmentButtons()
+    {
+        this.ShowAlignmentButtons = !this.ShowAlignmentButtons;
     }
 
     /// <summary>
@@ -424,6 +449,18 @@ public class MapPageViewModel : ViewModelBase
     {
         var world = await this.appState.GetCurrentWorldAsync().ConfigureAwait(true);
         this.Title = world.Name;
+    }
+
+    /// <summary>
+    /// Centers the camera on the chunk containing the currently selected marker and adjusts the zoom level.
+    /// </summary>
+    private void ZoomToChunk()
+    {
+        var point = this.Layout.GetMapCoordinate(this.SelectedMarker);
+        var chunkX = (float)Math.Floor(point.X / 16.0f) * 16.0f;
+        var chunkY = (float)Math.Floor(point.Y / 16.0f) * 16.0f;
+
+        this.Camera.CenterAndFit(chunkX + 8.0f, chunkY + 8.0f, 10);
     }
 
     /// <summary>
