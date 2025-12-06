@@ -109,6 +109,16 @@ public class MarkerViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Gets or sets a string representation of the distance, bearing, and cardinal direction
+    /// from the current marker to a pinned marker.
+    /// </summary>
+    public string DistanceBearing
+    {
+        get => this.GetValue<string>();
+        set => this.SetValue(value);
+    }
+
+    /// <summary>
     /// Gets or sets the X-coordinate of the marker.
     /// </summary>
     public float X
@@ -167,5 +177,6 @@ public class MarkerViewModel : ViewModelBase
         this.Distance = (float)Math.Sqrt(Math.Pow(this.X - pinned.X, 2) + Math.Pow(this.Z - pinned.Z, 2));
         this.Bearing = (float)(Math.Atan2(this.X - pinned.X, pinned.Z - this.Z) * (180.0 / Math.PI));
         this.Direction = this.directions[(((int)this.Bearing + 360) / Slices) % 16];
+        this.DistanceBearing = $"{this.Distance}, {this.Bearing}° {this.Direction}";
     }
 }

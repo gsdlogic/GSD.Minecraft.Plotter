@@ -37,7 +37,7 @@ public class MapPageViewModel : ViewModelBase
         this.NetherCommand = new Command(() => this.SetLayout(new NetherMapLayout()));
         this.ChunkCommand = new Command(this.ChunkAlign);
         this.PinCommand = new Command(this.PinSelectedMarker);
-        this.ResetCommand = new Command(this.ResetMap);
+        this.ResetCommand = new Command(this.ZoomToExtents);
         this.MoveMarkerCommand = new Command(this.MoveMarker);
 
         this.Camera = new Camera();
@@ -122,6 +122,15 @@ public class MapPageViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the chunk alignment buttons are displayed on the map.
+    /// </summary>
+    public bool ShowChunkAlignment
+    {
+        get => this.GetValue<bool>();
+        set => this.SetValue(value);
+    }
+
+    /// <summary>
     /// Gets or sets the title of the map page, which dynamically reflects the name of the current world.
     /// </summary>
     public string Title
@@ -196,8 +205,14 @@ public class MapPageViewModel : ViewModelBase
     /// </summary>
     private void ChunkAlign()
     {
-        var point = this.Layout.GetMapCoordinate(this.SelectedMarker);
+        this.ShowChunkAlignment = !this.ShowChunkAlignment;
 
+        if (!this.ShowChunkAlignment)
+        {
+            return;
+        }
+
+        var point = this.Layout.GetMapCoordinate(this.SelectedMarker);
         var chunkX = (float)Math.Floor(point.X / 16.0f) * 16.0f;
         var chunkY = (float)Math.Floor(point.Y / 16.0f) * 16.0f;
 
@@ -221,7 +236,6 @@ public class MapPageViewModel : ViewModelBase
         }
 
         var point = this.Layout.GetMapCoordinate(marker);
-
         var chunkX = (float)Math.Floor(point.X / 16.0f) * 16.0f;
         var chunkY = (float)Math.Floor(point.Y / 16.0f) * 16.0f;
 
@@ -264,7 +278,12 @@ public class MapPageViewModel : ViewModelBase
                 break;
         }
 
-        await this.appState.AddOrUpdateMarkerAsync(marker.ToModel()).ConfigureAwait(false);
+        if (this.Markers.Any(m => m.Id == marker.Id))
+        {
+            await this.appState.AddOrUpdateMarkerAsync(marker.ToModel()).ConfigureAwait(false);
+            this.SelectedMarker = this.Markers.FirstOrDefault(m => m.Id == marker.Id);
+        }
+
         this.Camera.Invalidate();
     }
 
@@ -300,18 +319,9 @@ public class MapPageViewModel : ViewModelBase
     /// </summary>
     private void PinSelectedMarker()
     {
-        this.PinnedMarker = this.SelectedMarker;
+        this.PinnedMarker = this.PinnedMarker == this.SelectedMarker ? null : this.SelectedMarker;
         this.SelectedMarker?.PinTo(this.PinnedMarker);
         this.Camera.Invalidate();
-    }
-
-    /// <summary>
-    /// Resets the map.
-    /// </summary>
-    private void ResetMap()
-    {
-        this.PinnedMarker = null;
-        this.ZoomToExtents();
     }
 
     /// <summary>
