@@ -35,7 +35,7 @@ public class MapDrawable : ViewModelBase, IDrawable
         canvas.SaveState();
 
         this.DrawGrid(canvas);
-        this.DrawPoints(canvas);
+        this.DrawMarkers(canvas);
 
         canvas.RestoreState();
     }
@@ -69,7 +69,7 @@ public class MapDrawable : ViewModelBase, IDrawable
 
         for (var x = startX; x <= endX; x += gridSpacing)
         {
-            var sx = this.viewModel.Camera.WorldToScreenX(x - 0.5f);
+            var sx = this.viewModel.Camera.WorldToScreenX(x);
             var floor = MathF.Floor(x);
             var isOrigin = floor == 0;
             var isChunkLine = floor % 16 == 0;
@@ -93,7 +93,7 @@ public class MapDrawable : ViewModelBase, IDrawable
 
         for (var y = startY; y <= endY; y += gridSpacing)
         {
-            var sy = this.viewModel.Camera.WorldToScreenY(y - 0.5f);
+            var sy = this.viewModel.Camera.WorldToScreenY(y);
             var floor = MathF.Floor(y);
             var isOrigin = floor == 0;
             var isChunkLine = floor % 16 == 0;
@@ -112,22 +112,19 @@ public class MapDrawable : ViewModelBase, IDrawable
     }
 
     /// <summary>
-    /// Draws the points of interest (POIs) onto the specified canvas using the provided camera for coordinate transformations.
+    /// Draws the markers onto the specified canvas using the provided camera for coordinate transformations.
     /// </summary>
     /// <param name="canvas">The canvas on which the points will be drawn.</param>
-    private void DrawPoints(ICanvas canvas)
+    private void DrawMarkers(ICanvas canvas)
     {
         var pinned = this.viewModel.PinnedMarker;
         var selected = this.viewModel.SelectedMarker;
 
         foreach (var marker in this.viewModel.Markers)
         {
-            var point = this.viewModel.Layout?.GetMapCoordinate(marker) ?? (marker.X, marker.Y);
-            var truncatedX = (float)Math.Truncate(point.X);
-            var truncatedY = (float)Math.Truncate(point.Y);
-
-            var screenX = this.viewModel.Camera.WorldToScreenX(truncatedX);
-            var screenY = this.viewModel.Camera.WorldToScreenY(truncatedY);
+            var point = this.viewModel.Layout.GetMapCoordinate(marker);
+            var screenX = this.viewModel.Camera.WorldToScreenX(point.X + 0.5f);
+            var screenY = this.viewModel.Camera.WorldToScreenY(point.Y + 0.5f);
 
             if ((marker != selected) && (marker != pinned))
             {
@@ -138,18 +135,14 @@ public class MapDrawable : ViewModelBase, IDrawable
             canvas.FontColor = Colors.White;
             canvas.FontSize = 14;
             canvas.DrawString($"{marker.Name}", screenX + 15, screenY - 8, HorizontalAlignment.Left);
-            canvas.DrawString($"{truncatedX},{truncatedY}", screenX + 15, screenY + 8, HorizontalAlignment.Left);
+            canvas.DrawString($"{point.X},{point.Y}", screenX + 15, screenY + 8, HorizontalAlignment.Left);
         }
 
         if (selected != null)
         {
-            var point = this.viewModel.Layout?.GetMapCoordinate(selected) ?? (selected.X, selected.Y);
-
-            var truncatedX = (float)Math.Truncate(point.X);
-            var truncatedY = (float)Math.Truncate(point.Y);
-
-            var screenX = this.viewModel.Camera.WorldToScreenX(truncatedX);
-            var screenY = this.viewModel.Camera.WorldToScreenY(truncatedY);
+            var point = this.viewModel.Layout.GetMapCoordinate(selected);
+            var screenX = this.viewModel.Camera.WorldToScreenX(point.X + 0.5f);
+            var screenY = this.viewModel.Camera.WorldToScreenY(point.Y + 0.5f);
 
             canvas.FillColor = Colors.Yellow;
             canvas.StrokeColor = Colors.Yellow;
@@ -159,13 +152,9 @@ public class MapDrawable : ViewModelBase, IDrawable
 
         if (pinned != null)
         {
-            var point = this.viewModel.Layout?.GetMapCoordinate(pinned) ?? (pinned.X, pinned.Y);
-
-            var truncatedX = (float)Math.Truncate(point.X);
-            var truncatedY = (float)Math.Truncate(point.Y);
-
-            var screenX = this.viewModel.Camera.WorldToScreenX(truncatedX);
-            var screenY = this.viewModel.Camera.WorldToScreenY(truncatedY);
+            var point = this.viewModel.Layout.GetMapCoordinate(pinned);
+            var screenX = this.viewModel.Camera.WorldToScreenX(point.X + 0.5f);
+            var screenY = this.viewModel.Camera.WorldToScreenY(point.Y + 0.5f);
 
             canvas.FillColor = Colors.Green;
             canvas.StrokeColor = Colors.Green;

@@ -35,7 +35,10 @@ public class MapPageViewModel : ViewModelBase
 
         this.OverworldCommand = new Command(() => this.SetLayout(new OverworldMapLayout()));
         this.NetherCommand = new Command(() => this.SetLayout(new NetherMapLayout()));
+        this.ChunkCommand = new Command(this.ChunkAlign);
         this.PinCommand = new Command(this.PinSelectedMarker);
+        this.ResetCommand = new Command(this.ResetMap);
+        this.MoveMarkerCommand = new Command(this.MoveMarker);
 
         this.Camera = new Camera();
         this.Layout = new OverworldMapLayout();
@@ -50,6 +53,11 @@ public class MapPageViewModel : ViewModelBase
     /// for rendering and interacting with the 2D map.
     /// </summary>
     public Camera Camera { get; }
+
+    /// <summary>
+    /// Gets the command chunk align the selected marker.
+    /// </summary>
+    public ICommand ChunkCommand { get; }
 
     /// <summary>
     /// Gets the map drawable.
@@ -69,6 +77,11 @@ public class MapPageViewModel : ViewModelBase
     /// Gets the collection of markers.
     /// </summary>
     public ObservableCollection<MarkerViewModel> Markers { get; } = [];
+
+    /// <summary>
+    /// Gets the command to move the marker.
+    /// </summary>
+    public ICommand MoveMarkerCommand { get; }
 
     /// <summary>
     /// Gets the command to set the layout relative to the Nether map.
@@ -93,6 +106,11 @@ public class MapPageViewModel : ViewModelBase
         get => this.GetValue<MarkerViewModel>();
         set => this.SetValue(value);
     }
+
+    /// <summary>
+    /// Gets the command to reset the map.
+    /// </summary>
+    public ICommand ResetCommand { get; }
 
     /// <summary>
     /// Gets or sets the currently selected marker on the map.
@@ -161,7 +179,92 @@ public class MapPageViewModel : ViewModelBase
             }
         }
 
+        this.SelectedMarker ??= new MarkerViewModel
+        {
+            Name = "World Coordinate",
+            X = worldX,
+            Y = 0,
+            Z = worldY,
+        };
+
         this.SelectedMarker?.PinTo(this.PinnedMarker);
+        this.Camera.Invalidate();
+    }
+
+    /// <summary>
+    /// Aligns the selected marker to the chunk.
+    /// </summary>
+    private void ChunkAlign()
+    {
+        var point = this.Layout.GetMapCoordinate(this.SelectedMarker);
+
+        var chunkX = (float)Math.Floor(point.X / 16.0f) * 16.0f;
+        var chunkY = (float)Math.Floor(point.Y / 16.0f) * 16.0f;
+
+        this.Camera.CenterAndFit(chunkX + 8.0f, chunkY + 8.0f, 10);
+    }
+
+    /// <summary>
+    /// Moves the selected marker in the cardinal direction.
+    /// </summary>
+    /// <param name="obj">An integer in the range of 0 to 8.</param>
+    /// ReSharper disable once AsyncVoidMethod
+    private async void MoveMarker(object obj)
+    {
+        var marker = this.SelectedMarker;
+
+        if ((marker == null) ||
+            obj is not string value ||
+            !int.TryParse(value, out var direction))
+        {
+            return;
+        }
+
+        var point = this.Layout.GetMapCoordinate(marker);
+
+        var chunkX = (float)Math.Floor(point.X / 16.0f) * 16.0f;
+        var chunkY = (float)Math.Floor(point.Y / 16.0f) * 16.0f;
+
+        switch (direction)
+        {
+            case 0:
+                this.Layout.SetMapCoordinate(marker, chunkX, chunkY);
+                break;
+
+            case 1:
+                this.Layout.SetMapCoordinate(marker, chunkX + 8.0f, chunkY);
+                break;
+
+            case 2:
+                this.Layout.SetMapCoordinate(marker, chunkX + 15.0f, chunkY);
+                break;
+
+            case 3:
+                this.Layout.SetMapCoordinate(marker, chunkX, chunkY + 8.0f);
+                break;
+
+            case 4:
+                this.Layout.SetMapCoordinate(marker, chunkX + 8.0f, chunkY + 8.0f);
+                break;
+
+            case 5:
+                this.Layout.SetMapCoordinate(marker, chunkX + 15.0f, chunkY + 8.0f);
+                break;
+
+            case 6:
+                this.Layout.SetMapCoordinate(marker, chunkX, chunkY + 15.0f);
+                break;
+
+            case 7:
+                this.Layout.SetMapCoordinate(marker, chunkX + 8.0f, chunkY + 15.0f);
+                break;
+
+            case 8:
+                this.Layout.SetMapCoordinate(marker, chunkX + 15.0f, chunkY + 15.0f);
+                break;
+        }
+
+        await this.appState.AddOrUpdateMarkerAsync(marker.ToModel()).ConfigureAwait(false);
         this.Camera.Invalidate();
     }
 
@@ -197,9 +300,18 @@ public class MapPageViewModel : ViewModelBase
     /// </summary>
     private void PinSelectedMarker()
     {
-        (this.PinnedMarker, this.SelectedMarker) = (this.SelectedMarker, this.PinnedMarker);
+        this.PinnedMarker = this.SelectedMarker;
         this.SelectedMarker?.PinTo(this.PinnedMarker);
         this.Camera.Invalidate();
+    }
+
+    /// <summary>
+    /// Resets the map.
+    /// </summary>
+    private void ResetMap()
+    {
+        this.PinnedMarker = null;
+        this.ZoomToExtents();
     }
 
     /// <summary>
@@ -236,7 +348,6 @@ public class MapPageViewModel : ViewModelBase
 
         if (this.Markers.Count > 0)
         {
-            this.PinnedMarker = this.Markers[0];
             this.SelectedMarker = this.Markers[0];
             this.SelectedMarker.PinTo(this.PinnedMarker);
         }

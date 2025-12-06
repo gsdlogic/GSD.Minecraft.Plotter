@@ -41,4 +41,17 @@ public class NetherMapLayout : IMapLayout
         ArgumentNullException.ThrowIfNull(marker);
         return (marker.X / 8.0f, marker.Z / 8.0f);
     }
+
+    /// <summary>
+    /// Sets the map coordinates for the specified marker.
+    /// </summary>
+    /// <param name="marker">The marker for which the map coordinates are to be set.</param>
+    /// <param name="x">The X coordinate to set for the marker on the map.</param>
+    /// <param name="y">The Y coordinate to set for the marker on the map.</param>
+    public void SetMapCoordinate(MarkerViewModel marker, float x, float y)
+    {
+        ArgumentNullException.ThrowIfNull(marker);
+        marker.X = x * 8.0f;
+        marker.Z = y * 8.0f;
+    }
 }

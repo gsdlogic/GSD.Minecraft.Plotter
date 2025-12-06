@@ -2,10 +2,15 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewModels="clr-namespace:GSD.Minecraft.Plotter.ViewModels"
+             xmlns:converters="clr-namespace:GSD.Minecraft.Plotter.Converters"
              x:Class="GSD.Minecraft.Plotter.Views.MapPage"
              x:DataType="viewModels:MapPageViewModel"
              Shell.NavBarIsVisible="True"
              Title="{Binding Title}">
+
+  <ContentPage.Resources>
+    <converters:IsNotNullVisibilityConverter x:Key="IsNotNullVisibilityConverter" />
+  </ContentPage.Resources>
 
   <ContentPage.ToolbarItems>
     <ToolbarItem Text="Overworld" Order="Secondary" Priority="0" Command="{Binding OverworldCommand}" />
@@ -22,9 +27,53 @@
       </GraphicsView.GestureRecognizers>
     </GraphicsView>
 
-    <Grid Grid.Row="1" ColumnDefinitions="*,*">
+    <VerticalStackLayout Grid.Row="1">
 
-      <Border Grid.Column="0" Margin="2" Stroke="Green">
+      <Grid ColumnDefinitions="*,Auto">
+
+        <Border Grid.Column="0" Margin="2" Stroke="Yellow">
+          <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto,Auto,Auto" Padding="10" RowSpacing="5" ColumnSpacing="10">
+            <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Spacing="5">
+              <Button Text="Pin" Command="{Binding PinCommand}" />
+              <Button Text="Chunk" Command="{Binding ChunkCommand}" />
+              <Button Text="Reset" Command="{Binding ResetCommand}" />
+            </HorizontalStackLayout>
+            <Label Grid.Row="1" Grid.Column="0" Text="{Binding SelectedMarker.Name}" />
+            <Label Grid.Row="1" Grid.Column="1" Text="X" HorizontalTextAlignment="End" />
+            <Label Grid.Row="1" Grid.Column="2" Text="Y" HorizontalTextAlignment="End" />
+            <Label Grid.Row="1" Grid.Column="3" Text="Z" HorizontalTextAlignment="End" />
+            <Label Grid.Row="2" Grid.Column="0" Text="Overworld" />
+            <Label Grid.Row="2" Grid.Column="1" Text="{Binding SelectedMarker.X}" HorizontalTextAlignment="End" />
+            <Label Grid.Row="2" Grid.Column="2" Text="{Binding SelectedMarker.Y}" HorizontalTextAlignment="End" />
+            <Label Grid.Row="2" Grid.Column="3" Text="{Binding SelectedMarker.Z}" HorizontalTextAlignment="End" />
+            <Label Grid.Row="3" Grid.Column="0" Text="Nether" />
+            <Label Grid.Row="3" Grid.Column="1" Text="{Binding SelectedMarker.NetherX}" HorizontalTextAlignment="End" />
+            <Label Grid.Row="3" Grid.Column="2" Text="{Binding SelectedMarker.NetherY}" HorizontalTextAlignment="End" />
+            <Label Grid.Row="3" Grid.Column="3" Text="{Binding SelectedMarker.NetherZ}" HorizontalTextAlignment="End" />
+            <Label Grid.Row="4" Grid.Column="0" Text="Distance/Bearing" />
+            <Label Grid.Row="4" Grid.Column="1" Text="{Binding SelectedMarker.Distance}" HorizontalTextAlignment="End" />
+            <Label Grid.Row="4" Grid.Column="2" Text="{Binding SelectedMarker.Direction}" HorizontalTextAlignment="End" />
+            <Label Grid.Row="4" Grid.Column="3" Text="{Binding SelectedMarker.Bearing}" HorizontalTextAlignment="End" />
+          </Grid>
+        </Border>
+
+        <Border Grid.Column="1" Margin="2" StrokeThickness="0" HorizontalOptions="Center" VerticalOptions="Center" Padding="5">
+          <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,Auto,Auto" RowSpacing="2" ColumnSpacing="2">
+            <Button Grid.Row="0" Grid.Column="0" Text="&#x2196;" Command="{Binding MoveMarkerCommand}" CommandParameter="0" />
+            <Button Grid.Row="0" Grid.Column="1" Text="&#x2191;" Command="{Binding MoveMarkerCommand}" CommandParameter="1"  />
+            <Button Grid.Row="0" Grid.Column="2" Text="&#x2197;" Command="{Binding MoveMarkerCommand}" CommandParameter="2"  />
+            <Button Grid.Row="1" Grid.Column="0" Text="&#x2190;" Command="{Binding MoveMarkerCommand}" CommandParameter="3"  />
+            <Button Grid.Row="1" Grid.Column="1" Text="&#x25CE;" Command="{Binding MoveMarkerCommand}" CommandParameter="4"  />
+            <Button Grid.Row="1" Grid.Column="2" Text="&#x2192;" Command="{Binding MoveMarkerCommand}" CommandParameter="5"  />
+            <Button Grid.Row="2" Grid.Column="0" Text="&#x2199;" Command="{Binding MoveMarkerCommand}" CommandParameter="6"  />
+            <Button Grid.Row="2" Grid.Column="1" Text="&#x2193;" Command="{Binding MoveMarkerCommand}" CommandParameter="7"  />
+            <Button Grid.Row="2" Grid.Column="2" Text="&#x2198;" Command="{Binding MoveMarkerCommand}" CommandParameter="8"  />
+          </Grid>
+        </Border>
+
+      </Grid>
+
+      <Border Margin="2" Stroke="Green" IsVisible="{Binding PinnedMarker, Converter={StaticResource IsNotNullVisibilityConverter}}">
         <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto,Auto,Auto" Padding="10" RowSpacing="5" ColumnSpacing="10">
           <Label Grid.Row="0" Grid.Column="0" Text="{Binding PinnedMarker.Name}" />
           <Label Grid.Row="0" Grid.Column="1" Text="X" HorizontalTextAlignment="End" />
@@ -41,29 +90,7 @@
         </Grid>
       </Border>
 
-      <Border Grid.Column="1" Margin="2" Stroke="Yellow">
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto,Auto,Auto" Padding="10" RowSpacing="5" ColumnSpacing="10">
-          <Label Grid.Row="0" Grid.Column="0" Text="{Binding SelectedMarker.Name}" />
-          <Label Grid.Row="0" Grid.Column="1" Text="X" HorizontalTextAlignment="End" />
-          <Label Grid.Row="0" Grid.Column="2" Text="Y" HorizontalTextAlignment="End" />
-          <Label Grid.Row="0" Grid.Column="3" Text="Z" HorizontalTextAlignment="End" />
-          <Label Grid.Row="1" Grid.Column="0" Text="Overworld" />
-          <Label Grid.Row="1" Grid.Column="1" Text="{Binding SelectedMarker.X}" HorizontalTextAlignment="End" />
-          <Label Grid.Row="1" Grid.Column="2" Text="{Binding SelectedMarker.Y}" HorizontalTextAlignment="End" />
-          <Label Grid.Row="1" Grid.Column="3" Text="{Binding SelectedMarker.Z}" HorizontalTextAlignment="End" />
-          <Label Grid.Row="2" Grid.Column="0" Text="Nether" />
-          <Label Grid.Row="2" Grid.Column="1" Text="{Binding SelectedMarker.NetherX}" HorizontalTextAlignment="End" />
-          <Label Grid.Row="2" Grid.Column="2" Text="{Binding SelectedMarker.NetherY}" HorizontalTextAlignment="End" />
-          <Label Grid.Row="2" Grid.Column="3" Text="{Binding SelectedMarker.NetherZ}" HorizontalTextAlignment="End" />
-          <Label Grid.Row="3" Grid.Column="0" Text="Distance/Bearing" />
-          <Label Grid.Row="3" Grid.Column="1" Text="{Binding SelectedMarker.Distance}" HorizontalTextAlignment="End" />
-          <Label Grid.Row="3" Grid.Column="2" Text="{Binding SelectedMarker.Direction}" HorizontalTextAlignment="End" />
-          <Label Grid.Row="3" Grid.Column="3" Text="{Binding SelectedMarker.Bearing}" HorizontalTextAlignment="End" />
-          <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4" Text="&lt;&lt; Pin" Command="{Binding PinCommand}" HorizontalOptions="End" VerticalOptions="Center"/>
-        </Grid>
-      </Border>
-
-    </Grid>
+    </VerticalStackLayout>
 
     <!--<VerticalStackLayout Grid.Row="1" Padding="10" Spacing="5">
       <Label Text="{Binding Camera.Zoom, StringFormat='Zoom: {0:F4}'}" />

@@ -28,8 +28,8 @@ public class MarkerViewModel : ViewModelBase
         get => this.GetValue<float>();
         private set
         {
-            var truncated = (float)Math.Truncate(value);
-            this.SetValue(truncated);
+            var floor = (float)Math.Floor(value);
+            this.SetValue(floor);
         }
     }
 
@@ -50,8 +50,8 @@ public class MarkerViewModel : ViewModelBase
         get => this.GetValue<float>();
         private set
         {
-            var truncated = (float)Math.Truncate(value);
-            this.SetValue(truncated);
+            var floor = (float)Math.Floor(value);
+            this.SetValue(floor);
         }
     }
 
@@ -77,8 +77,8 @@ public class MarkerViewModel : ViewModelBase
         get => this.GetValue<float>();
         private set
         {
-            var truncated = (float)Math.Truncate(value);
-            this.SetValue(truncated);
+            var floor = (float)Math.Floor(value);
+            this.SetValue(floor);
         }
     }
 
@@ -90,8 +90,8 @@ public class MarkerViewModel : ViewModelBase
         get => this.GetValue<float>();
         private set
         {
-            var truncated = (float)Math.Truncate(value);
-            this.SetValue(truncated);
+            var floor = (float)Math.Floor(value);
+            this.SetValue(floor);
         }
     }
 
@@ -103,8 +103,8 @@ public class MarkerViewModel : ViewModelBase
         get => this.GetValue<float>();
         private set
         {
-            var truncated = (float)Math.Truncate(value);
-            this.SetValue(truncated);
+            var floor = (float)Math.Floor(value);
+            this.SetValue(floor);
         }
     }
 
@@ -116,9 +116,9 @@ public class MarkerViewModel : ViewModelBase
         get => this.GetValue<float>();
         set
         {
-            var truncated = (float)Math.Truncate(value);
-            this.SetValue(truncated);
-            this.NetherX = truncated / 8.0f;
+            var floor = (float)Math.Floor(value);
+            this.SetValue(floor);
+            this.NetherX = floor / 8.0f;
         }
     }
 
@@ -130,9 +130,9 @@ public class MarkerViewModel : ViewModelBase
         get => this.GetValue<float>();
         set
         {
-            var truncated = (float)Math.Truncate(value);
-            this.SetValue(truncated);
-            this.NetherY = truncated / 8.0f;
+            var floor = (float)Math.Floor(value);
+            this.SetValue(floor);
+            this.NetherY = floor / 8.0f;
         }
     }
 
@@ -144,9 +144,9 @@ public class MarkerViewModel : ViewModelBase
         get => this.GetValue<float>();
         set
         {
-            var truncated = (float)Math.Truncate(value);
-            this.SetValue(truncated);
-            this.NetherZ = truncated / 8.0f;
+            var floor = (float)Math.Floor(value);
+            this.SetValue(floor);
+            this.NetherZ = floor / 8.0f;
         }
     }
 

@@ -101,6 +101,10 @@ public partial class MapPage
                 case GestureStatus.Completed:
                     this.panStarted = false;
                     break;
+
+                case GestureStatus.Canceled:
+                default:
+                    break;
             }
         }
     }
