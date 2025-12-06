@@ -351,7 +351,7 @@ public class AppState
                         continue;
                     }
 
-                    if (double.TryParse(rows[i][col], NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+                    if (double.TryParse(rows[i][col], CultureInfo.InvariantCulture, out _))
                     {
                         anyNumeric = true;
                     }
@@ -402,7 +402,7 @@ public class AppState
                     continue;
                 }
 
-                if ((x < 0) || (y < 0) || !double.TryParse(row[x], NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+                if ((x < 0) || (y < 0) || !double.TryParse(row[x], CultureInfo.InvariantCulture, out _))
                 {
                     continue;
                 }

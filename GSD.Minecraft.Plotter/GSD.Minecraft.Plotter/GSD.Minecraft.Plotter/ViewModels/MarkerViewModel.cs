@@ -10,23 +10,12 @@ namespace GSD.Minecraft.Plotter.ViewModels;
 public class MarkerViewModel : ViewModelBase
 {
     /// <summary>
-    /// The cardinal directions.
-    /// </summary>
-    private readonly string[] directions =
-    [
-        "N", "NNE", "NE", "ENE",
-        "E", "ESE", "SE", "SSE",
-        "S", "SSW", "SW", "WSW",
-        "W", "WNW", "NW", "NNW",
-    ];
-
-    /// <summary>
-    /// Gets the bearing to the pinned marker.
+    /// Gets or sets the bearing to the pinned marker.
     /// </summary>
     public float Bearing
     {
         get => this.GetValue<float>();
-        private set
+        set
         {
             var floor = (float)Math.Floor(value);
             this.SetValue(floor);
@@ -34,25 +23,35 @@ public class MarkerViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets the cardinal direction from the pinned marker.
+    /// Gets or sets the cardinal direction from the pinned marker.
     /// </summary>
     public string Direction
     {
         get => this.GetValue<string>();
-        private set => this.SetValue(value);
+        set => this.SetValue(value);
     }
 
     /// <summary>
-    /// Gets the distance from the pinned marker.
+    /// Gets or sets the distance from the pinned marker.
     /// </summary>
     public float Distance
     {
         get => this.GetValue<float>();
-        private set
+        set
         {
             var floor = (float)Math.Floor(value);
             this.SetValue(floor);
         }
+    }
+
+    /// <summary>
+    /// Gets or sets a string representation of the distance, bearing, and cardinal direction
+    /// from the current marker to a pinned marker.
+    /// </summary>
+    public string DistanceBearing
+    {
+        get => this.GetValue<string>();
+        set => this.SetValue(value);
     }
 
     /// <summary>
@@ -109,16 +108,6 @@ public class MarkerViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets or sets a string representation of the distance, bearing, and cardinal direction
-    /// from the current marker to a pinned marker.
-    /// </summary>
-    public string DistanceBearing
-    {
-        get => this.GetValue<string>();
-        set => this.SetValue(value);
-    }
-
-    /// <summary>
     /// Gets or sets the X-coordinate of the marker.
     /// </summary>
     public float X
@@ -158,25 +147,5 @@ public class MarkerViewModel : ViewModelBase
             this.SetValue(floor);
             this.NetherZ = floor / 8.0f;
         }
-    }
-
-    /// <summary>
-    /// Updates the pinned marker.
-    /// </summary>
-    /// <param name="pinned">The pinned marker.</param>
-    public void PinTo(MarkerViewModel pinned)
-    {
-        const int Slices = 360 / 16;
-
-        if (pinned == null)
-        {
-            this.Distance = 0.0f;
-            return;
-        }
-
-        this.Distance = (float)Math.Sqrt(Math.Pow(this.X - pinned.X, 2) + Math.Pow(this.Z - pinned.Z, 2));
-        this.Bearing = (float)(Math.Atan2(this.X - pinned.X, pinned.Z - this.Z) * (180.0 / Math.PI));
-        this.Direction = this.directions[(((int)this.Bearing + 360) / Slices) % 16];
-        this.DistanceBearing = $"{this.Distance}, {this.Bearing}° {this.Direction}";
     }
 }

@@ -19,6 +19,17 @@ public class MapPageViewModel : ViewModelBase
     private readonly AppState appState;
 
     /// <summary>
+    /// The cardinal directions.
+    /// </summary>
+    private readonly string[] directions =
+    [
+        "N", "NNE", "NE", "ENE",
+        "E", "ESE", "SE", "SSE",
+        "S", "SSW", "SW", "WSW",
+        "W", "WNW", "NW", "NNW",
+    ];
+
+    /// <summary>
     /// Indicates whether a new world has been loaded or initialized.
     /// </summary>
     private bool newWorld;
@@ -70,7 +81,11 @@ public class MapPageViewModel : ViewModelBase
     public IMapLayout Layout
     {
         get => this.GetValue<IMapLayout>();
-        set => this.SetValue(value);
+        set
+        {
+            this.SetValue(value);
+            this.UpdatePinnedMarker();
+        }
     }
 
     /// <summary>
@@ -104,7 +119,11 @@ public class MapPageViewModel : ViewModelBase
     public MarkerViewModel PinnedMarker
     {
         get => this.GetValue<MarkerViewModel>();
-        set => this.SetValue(value);
+        set
+        {
+            this.SetValue(value);
+            this.UpdatePinnedMarker();
+        }
     }
 
     /// <summary>
@@ -118,7 +137,11 @@ public class MapPageViewModel : ViewModelBase
     public MarkerViewModel SelectedMarker
     {
         get => this.GetValue<MarkerViewModel>();
-        set => this.SetValue(value);
+        set
+        {
+            this.SetValue(value);
+            this.UpdatePinnedMarker();
+        }
     }
 
     /// <summary>
@@ -196,8 +219,40 @@ public class MapPageViewModel : ViewModelBase
             Z = worldY,
         };
 
-        this.SelectedMarker?.PinTo(this.PinnedMarker);
         this.Camera.Invalidate();
+    }
+
+    /// <summary>
+    /// Updates the calculations for the pinned marker.
+    /// </summary>
+    public void UpdatePinnedMarker()
+    {
+        const int Slices = 360 / 16;
+
+        var marker = this.SelectedMarker;
+        var pinned = this.PinnedMarker;
+
+        if (marker == null)
+        {
+            return;
+        }
+
+        if (pinned == null)
+        {
+            marker.Distance = 0.0f;
+            marker.Bearing = 0.0f;
+            marker.Direction = null;
+            marker.DistanceBearing = null;
+            return;
+        }
+
+        var markerPoint = this.Layout.GetMapCoordinate(marker);
+        var pinnedPoint = this.Layout.GetMapCoordinate(pinned);
+
+        marker.Distance = (float)Math.Sqrt(Math.Pow(markerPoint.X - pinnedPoint.X, 2) + Math.Pow(markerPoint.Y - pinnedPoint.Y, 2));
+        marker.Bearing = (float)(Math.Atan2(markerPoint.X - pinnedPoint.X, pinnedPoint.Y - markerPoint.Y) * (180.0 / Math.PI));
+        marker.Direction = this.directions[(((int)marker.Bearing + 360) / Slices) % 16];
+        marker.DistanceBearing = $"{marker.Distance}, {marker.Bearing}° {marker.Direction}";
     }
 
     /// <summary>
@@ -320,7 +375,6 @@ public class MapPageViewModel : ViewModelBase
     private void PinSelectedMarker()
     {
         this.PinnedMarker = this.PinnedMarker == this.SelectedMarker ? null : this.SelectedMarker;
-        this.SelectedMarker?.PinTo(this.PinnedMarker);
         this.Camera.Invalidate();
     }
 
@@ -359,7 +413,6 @@ public class MapPageViewModel : ViewModelBase
         if (this.Markers.Count > 0)
         {
             this.SelectedMarker = this.Markers[0];
-            this.SelectedMarker.PinTo(this.PinnedMarker);
         }
     }
 
@@ -378,6 +431,12 @@ public class MapPageViewModel : ViewModelBase
     /// </summary>
     private void ZoomToExtents()
     {
+        if (this.Markers.Count == 0)
+        {
+            this.Camera.CenterAndFit(0.0f, 0.0f, 64.0f);
+            return;
+        }
+
         var minX = this.Markers.Min(m => this.Layout.GetMapCoordinate(m).X);
         var minY = this.Markers.Min(m => this.Layout.GetMapCoordinate(m).Y);
         var maxX = this.Markers.Max(m => this.Layout.GetMapCoordinate(m).X);
